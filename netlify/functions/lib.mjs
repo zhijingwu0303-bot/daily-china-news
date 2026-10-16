@@ -9,7 +9,7 @@ export const SEARCH_QUERIES = [
   "香港 澳门 台湾 中国",
   "(site:yicai.com OR site:cls.cn OR site:21jingji.com OR site:stcn.com OR site:cnstock.com) 中国",
   "(site:thepaper.cn OR site:jiemian.com OR site:caixin.com) 中国",
-  "(site:gov.cn OR site:csrc.gov.cn OR site:pbc.gov.cn OR site:stats.gov.cn) 政策 公告 数据"
+  "(国务院 OR 国家发展改革委 OR 商务部 OR 中国人民银行 OR 证监会 OR 统计局) 中国 政策 数据"
 ];
 
 export const DIRECT_FEEDS = [
@@ -287,6 +287,7 @@ export function verifyGroups(groups) {
     const media = representativeSources.filter((source) => source.sourceType === "trusted_media");
 
     if (officials.length === 0 && media.length < 2) continue;
+    if (officials.length > 0 && media.length === 0 && !isHighImpactOfficial(group[0].title)) continue;
     verified.push({
       key: normalizeTitle(group[0].title),
       articles: group,
@@ -295,6 +296,14 @@ export function verifyGroups(groups) {
   }
 
   return verified;
+}
+
+function isHighImpactOfficial(title) {
+  const noise = /比选|采购|招标|中标|公示|申报|遴选|接访|拍卖|体检|租赁|自行采购|结果公告|开标公告/.test(title);
+  if (noise) return false;
+  return /国务院|国家发展改革委|发改委|商务部|财政部|中国人民银行|央行|证监会|统计局|工业和信息化部|工信部|市场监管总局|习近平|李强|政策|意见|条例|数据|经济|金融|贸易|出口|进口|关税|人工智能|芯片|房地产|就业|消费|利率|人民币/.test(
+    title
+  );
 }
 
 function hasCoreConflict(group) {
