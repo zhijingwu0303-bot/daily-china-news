@@ -7,7 +7,19 @@ export const SEARCH_QUERIES = [
   "中国 科技 芯片 人工智能",
   "中国 政策 监管",
   "香港 澳门 台湾 中国",
-  "China economy technology policy"
+  "China economy technology policy",
+  "site:yicai.com 中国",
+  "site:cls.cn 中国",
+  "site:21jingji.com 中国",
+  "site:stcn.com 中国",
+  "site:cnstock.com 中国",
+  "site:thepaper.cn 中国",
+  "site:jiemian.com 中国",
+  "site:caixin.com 中国",
+  "site:gov.cn 政策 公告",
+  "site:stats.gov.cn 数据",
+  "site:pbc.gov.cn 公告",
+  "site:csrc.gov.cn 公告"
 ];
 
 export const DIRECT_FEEDS = [
@@ -24,6 +36,11 @@ export const SOURCES = [
   { id: "stats-cn", name: "国家统计局", domain: "stats.gov.cn", sourceType: "official", trustLevel: 1 },
   { id: "court-cn", name: "中国法院网", domain: "chinacourt.org", sourceType: "official", trustLevel: 1 },
   { id: "macao-gov", name: "澳门特别行政区政府", domain: "gov.mo", sourceType: "official", trustLevel: 1 },
+  { id: "csrc", name: "中国证监会", domain: "csrc.gov.cn", sourceType: "official", trustLevel: 1 },
+  { id: "miit", name: "工业和信息化部", domain: "miit.gov.cn", sourceType: "official", trustLevel: 1 },
+  { id: "mofcom", name: "商务部", domain: "mofcom.gov.cn", sourceType: "official", trustLevel: 1 },
+  { id: "ndrc", name: "国家发展改革委", domain: "ndrc.gov.cn", sourceType: "official", trustLevel: 1 },
+  { id: "samr", name: "市场监管总局", domain: "samr.gov.cn", sourceType: "official", trustLevel: 1 },
   { id: "xinhua", name: "新华社", domain: "news.cn", sourceType: "trusted_media", trustLevel: 1 },
   { id: "people", name: "人民网", domain: "people.com.cn", sourceType: "trusted_media", trustLevel: 1 },
   { id: "chinanews", name: "中国新闻网", domain: "chinanews.com.cn", sourceType: "trusted_media", trustLevel: 1 },
@@ -225,7 +242,8 @@ function sameEvent(leftTitle, rightTitle) {
   const distinctive = overlap.filter(distinctiveToken);
   if (distinctive.length === 0) return false;
   if (distinctive.length >= 2 || overlap.length >= 3) return true;
-  return similarity(leftTitle, rightTitle) >= 0.25;
+  if (overlap.includes("数据") && similarity(leftTitle, rightTitle) >= 0.25) return true;
+  return similarity(leftTitle, rightTitle) >= 0.45;
 }
 
 function dateFromUrl(value) {
