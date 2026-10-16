@@ -1,5 +1,7 @@
 # 中国每日新闻 Netlify 极简版
 
+线上地址：https://zhijing-daily-news-2026.netlify.app
+
 这是一个只需要 Netlify 的新闻网站：
 
 - 打开网址时自动获取最近 36 小时新闻。
