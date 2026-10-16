@@ -2,6 +2,7 @@ const newsElement = document.querySelector("#news");
 const metaElement = document.querySelector("#meta");
 const tagsElement = document.querySelector("#tags");
 const refreshButton = document.querySelector("#refresh");
+const apiVersion = "20261017-3";
 
 let allItems = [];
 let activeTag = "";
@@ -89,7 +90,7 @@ async function loadNews() {
   metaElement.textContent = "正在获取新闻…";
 
   try {
-    const response = await fetch("/api/news", { cache: "no-store" });
+    const response = await fetch(`/api/news?v=${apiVersion}`, { cache: "no-store" });
     const data = await response.json();
     if (!response.ok) throw new Error(data.error || "获取失败");
 
