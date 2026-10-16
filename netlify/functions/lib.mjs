@@ -293,6 +293,13 @@ export function buildDigest(hits, now = new Date()) {
   }
 
   const groups = groupCandidates([...candidates.values()]);
+  const candidateSamples = [...candidates.values()]
+    .slice(0, 60)
+    .map((candidate) => ({
+      title: candidate.title,
+      source: candidate.source.id,
+      publishedAt: candidate.publishedAt.toISOString()
+    }));
   const verified = verifyGroups(groups)
     .map((group) => {
       const text = `${group.articles[0].title} ${group.articles[0].excerpt}`;
@@ -327,6 +334,7 @@ export function buildDigest(hits, now = new Date()) {
     diagnostics: {
       rawHits: hits.length,
       candidates: candidates.size,
+      candidateSamples,
       groups: groups.length,
       verified: verified.length,
       ...diagnoseGroups(groups)
