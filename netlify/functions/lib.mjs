@@ -233,7 +233,7 @@ function sameEvent(leftTitle, rightTitle) {
   if (distinctive.length === 0) return false;
   if (distinctive.length >= 2 || overlap.length >= 3) return true;
   if (overlap.includes("数据") && similarity(leftTitle, rightTitle) >= 0.25) return true;
-  return similarity(leftTitle, rightTitle) >= 0.45;
+  return similarity(leftTitle, rightTitle) >= 0.6;
 }
 
 function dateFromUrl(value) {
@@ -280,6 +280,7 @@ export function verifyGroups(groups) {
   const verified = [];
 
   for (const group of groups) {
+    if (hasCoreConflict(group)) continue;
     const representativeSources = representativeSourcesForGroup(group);
 
     const officials = representativeSources.filter((source) => source.sourceType === "official");
@@ -294,6 +295,13 @@ export function verifyGroups(groups) {
   }
 
   return verified;
+}
+
+function hasCoreConflict(group) {
+  const titles = group.map((article) => article.title).join(" ");
+  const positive = /上涨|高开|涨超|增长|升至|增加|盈利/.test(titles);
+  const negative = /下跌|低开|跌超|下降|减少|亏损/.test(titles);
+  return positive && negative;
 }
 
 function representativeSourcesForGroup(group) {

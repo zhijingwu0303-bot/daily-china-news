@@ -99,3 +99,33 @@ test("groups differently worded reports about the same economic event", () => {
   ]);
   assert.equal(groups.length, 1);
 });
+
+test("does not group unrelated stories merely because both mention AI", () => {
+  const groups = groupCandidates([
+    { title: "印度首次报告测试AI模型侵入企业系统", source: { id: "a" } },
+    { title: "中国科学家首次用中国大模型攻克世界级数学难题", source: { id: "b" } }
+  ]);
+  assert.equal(groups.length, 2);
+});
+
+test("rejects contradictory market-direction reports", () => {
+  const groups = verifyGroups([
+    [
+      {
+        title: "富时中国A50指数高开",
+        excerpt: "上涨",
+        canonicalUrl: "https://a.example/1",
+        url: "https://a.example/1",
+        source: { id: "yicai", name: "第一财经", sourceType: "trusted_media", trustLevel: 1 }
+      },
+      {
+        title: "富时中国A50指数期货跌超2%",
+        excerpt: "下跌",
+        canonicalUrl: "https://b.example/2",
+        url: "https://b.example/2",
+        source: { id: "jiemian", name: "界面新闻", sourceType: "trusted_media", trustLevel: 2 }
+      }
+    ]
+  ]);
+  assert.equal(groups.length, 0);
+});
