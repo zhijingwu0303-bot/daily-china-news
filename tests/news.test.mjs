@@ -3,6 +3,7 @@ import test from "node:test";
 import {
   buildDigest,
   classify,
+  groupCandidates,
   parseBingRss,
   verifyGroups
 } from "../netlify/functions/lib.mjs";
@@ -89,4 +90,12 @@ test("builds a latest-only digest", () => {
 test("classifies business and economic news", () => {
   assert.deepEqual(classify("国家统计局公布消费和GDP数据"), ["economics"]);
   assert.deepEqual(classify("某上市公司发布并购公告"), ["industries"]);
+});
+
+test("groups differently worded reports about the same economic event", () => {
+  const groups = groupCandidates([
+    { title: "中国公布最新经济数据", source: { id: "a" } },
+    { title: "最新官方统计显示中国经济数据", source: { id: "b" } }
+  ]);
+  assert.equal(groups.length, 1);
 });

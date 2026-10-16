@@ -146,11 +146,55 @@ export function similarity(a, b) {
   return longest === 0 ? 1 : 1 - levenshteinDistance(left, right) / longest;
 }
 
+const titleStopWords = new Set([
+  "中国",
+  "最新",
+  "官方",
+  "表示",
+  "发布",
+  "公布",
+  "显示",
+  "今年",
+  "今日",
+  "昨天",
+  "记者",
+  "报道",
+  "消息",
+  "相关",
+  "进行",
+  "计划",
+  "可能",
+  "已经",
+  "公司"
+]);
+
+const chineseSegmenter = new Intl.Segmenter("zh-CN", { granularity: "word" });
+
+function titleTokens(title) {
+  return new Set(
+    [...chineseSegmenter.segment(title)]
+      .filter((part) => part.isWordLike)
+      .map((part) => part.segment.toLowerCase())
+      .filter((token) => token.length >= 2 && !titleStopWords.has(token))
+  );
+}
+
+function sameEvent(leftTitle, rightTitle) {
+  if (similarity(leftTitle, rightTitle) >= 0.72) return true;
+
+  const left = titleTokens(leftTitle);
+  const right = titleTokens(rightTitle);
+  const overlap = [...left].filter((token) => right.has(token));
+  if (overlap.length >= 3) return true;
+  if (overlap.some((token) => token.length >= 3 || /[a-z0-9]/i.test(token))) return true;
+  return overlap.length >= 2 && similarity(leftTitle, rightTitle) >= 0.25;
+}
+
 export function groupCandidates(candidates) {
   const groups = [];
   for (const candidate of candidates) {
     const group = groups.find((items) =>
-      items.some((item) => similarity(item.title, candidate.title) >= 0.72)
+      items.some((item) => sameEvent(item.title, candidate.title))
     );
     if (group) group.push(candidate);
     else groups.push([candidate]);
