@@ -231,7 +231,8 @@ function sameEvent(leftTitle, rightTitle) {
   const overlap = [...left].filter((token) => right.has(token));
   const distinctive = overlap.filter(distinctiveToken);
   if (distinctive.length === 0) return false;
-  if (distinctive.length >= 2 || overlap.length >= 3) return true;
+  if (distinctive.length >= 2) return true;
+  if (overlap.length >= 3 && similarity(leftTitle, rightTitle) >= 0.45) return true;
   if (overlap.includes("数据") && similarity(leftTitle, rightTitle) >= 0.25) return true;
   return similarity(leftTitle, rightTitle) >= 0.6;
 }
