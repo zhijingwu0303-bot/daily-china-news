@@ -165,7 +165,37 @@ const titleStopWords = new Set([
   "计划",
   "可能",
   "已经",
-  "公司"
+  "公司",
+  "发展",
+  "经济",
+  "国家",
+  "全国",
+  "全球",
+  "世界",
+  "同比",
+  "增长",
+  "加快",
+  "推进",
+  "建设",
+  "上半年",
+  "前三季度"
+]);
+
+const specificShortTokens = new Set([
+  "数据",
+  "通胀",
+  "就业",
+  "消费",
+  "出口",
+  "进口",
+  "并购",
+  "芯片",
+  "利率",
+  "汇率",
+  "关税",
+  "房价",
+  "汽车",
+  "机器人"
 ]);
 
 const chineseSegmenter = new Intl.Segmenter("zh-CN", { granularity: "word" });
@@ -179,15 +209,34 @@ function titleTokens(title) {
   );
 }
 
+function distinctiveToken(token) {
+  if (/^\d+$/.test(token)) return false;
+  if (/^\d{4}(?:年|届|款|赛季)?$/u.test(token)) return false;
+  if (/[a-z]/i.test(token) && !/^\d/.test(token)) return true;
+  return (token.length >= 3 && !titleStopWords.has(token)) || specificShortTokens.has(token);
+}
+
 function sameEvent(leftTitle, rightTitle) {
   if (similarity(leftTitle, rightTitle) >= 0.72) return true;
 
   const left = titleTokens(leftTitle);
   const right = titleTokens(rightTitle);
   const overlap = [...left].filter((token) => right.has(token));
-  if (overlap.length >= 3) return true;
-  if (overlap.some((token) => token.length >= 3 || /[a-z0-9]/i.test(token))) return true;
-  return overlap.length >= 2 && similarity(leftTitle, rightTitle) >= 0.25;
+  const distinctive = overlap.filter(distinctiveToken);
+  if (distinctive.length === 0) return false;
+  if (distinctive.length >= 2 || overlap.length >= 3) return true;
+  return similarity(leftTitle, rightTitle) >= 0.25;
+}
+
+function dateFromUrl(value) {
+  try {
+    const pathname = new URL(value).pathname;
+    const full = pathname.match(/(20\d{2})[-/](\d{2})[-/](\d{2})/);
+    if (full) return new Date(`${full[1]}-${full[2]}-${full[3]}T12:00:00Z`);
+    const month = pathname.match(/(20\d{2})[-/](\d{2})(?:[-/]|$)/);
+    if (month) return new Date(`${month[1]}-${month[2]}-01T12:00:00Z`);
+  } catch {}
+  return null;
 }
 
 export function groupCandidates(candidates) {
@@ -311,7 +360,8 @@ export function buildDigest(hits, now = new Date()) {
     const source = sourceForUrl(hit.sourceUrl || hit.url);
     if (!source) continue;
 
-    const publishedAt = hit.pubDate ? new Date(hit.pubDate) : now;
+    const publishedAt = hit.pubDate ? new Date(hit.pubDate) : dateFromUrl(hit.url);
+    if (!publishedAt) continue;
     if (Number.isNaN(publishedAt.getTime()) || publishedAt.getTime() < cutoff) continue;
 
     let canonicalUrl;
