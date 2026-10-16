@@ -7,19 +7,9 @@ export const SEARCH_QUERIES = [
   "中国 科技 芯片 人工智能",
   "中国 政策 监管",
   "香港 澳门 台湾 中国",
-  "China economy technology policy",
-  "site:yicai.com 中国",
-  "site:cls.cn 中国",
-  "site:21jingji.com 中国",
-  "site:stcn.com 中国",
-  "site:cnstock.com 中国",
-  "site:thepaper.cn 中国",
-  "site:jiemian.com 中国",
-  "site:caixin.com 中国",
-  "site:gov.cn 政策 公告",
-  "site:stats.gov.cn 数据",
-  "site:pbc.gov.cn 公告",
-  "site:csrc.gov.cn 公告"
+  "(site:yicai.com OR site:cls.cn OR site:21jingji.com OR site:stcn.com OR site:cnstock.com) 中国",
+  "(site:thepaper.cn OR site:jiemian.com OR site:caixin.com) 中国",
+  "(site:gov.cn OR site:csrc.gov.cn OR site:pbc.gov.cn OR site:stats.gov.cn) 政策 公告 数据"
 ];
 
 export const DIRECT_FEEDS = [
@@ -480,6 +470,7 @@ export async function fetchBingNewsRss(query, fetchImpl = fetch) {
   url.searchParams.set("format", "rss");
 
   const response = await fetchImpl(url, {
+    signal: AbortSignal.timeout(4_500),
     headers: {
       "User-Agent": "DailyChinaNews/1.0 (+personal news reader)"
     }
@@ -496,6 +487,7 @@ export async function fetchGoogleNewsRss(query, fetchImpl = fetch) {
   url.searchParams.set("ceid", "CN:zh-Hans");
 
   const response = await fetchImpl(url, {
+    signal: AbortSignal.timeout(4_500),
     headers: {
       "User-Agent": "DailyChinaNews/1.0 (+personal news reader)"
     }
