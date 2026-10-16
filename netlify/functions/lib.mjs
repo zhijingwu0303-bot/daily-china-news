@@ -201,7 +201,6 @@ const specificShortTokens = new Set([
   "汇率",
   "关税",
   "房价",
-  "汽车",
   "机器人"
 ]);
 
