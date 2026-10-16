@@ -355,8 +355,13 @@ function canonicalizeUrl(value) {
 export function buildDigest(hits, now = new Date()) {
   const cutoff = now.getTime() - 36 * 60 * 60 * 1000;
   const candidates = new Map();
+  const rawHostCounts = {};
 
   for (const hit of hits) {
+    try {
+      const host = new URL(hit.sourceUrl || hit.url).hostname;
+      rawHostCounts[host] = (rawHostCounts[host] ?? 0) + 1;
+    } catch {}
     const source = sourceForUrl(hit.sourceUrl || hit.url);
     if (!source) continue;
 
@@ -439,6 +444,7 @@ export function buildDigest(hits, now = new Date()) {
     items: verified,
     diagnostics: {
       rawHits: hits.length,
+      rawHostCounts,
       candidates: candidates.size,
       candidateSamples,
       candidateSourceCounts,
