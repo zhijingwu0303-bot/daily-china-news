@@ -179,16 +179,7 @@ export function verifyGroups(groups) {
   const verified = [];
 
   for (const group of groups) {
-    const representativeSources = [
-      ...new Map(
-        contentClusters(group)
-          .map((cluster) => cluster[0])
-          .filter(Boolean)
-          .map((article) => article.source)
-          .filter(Boolean)
-          .map((source) => [source.id, source])
-      ).values()
-    ];
+    const representativeSources = representativeSourcesForGroup(group);
 
     const officials = representativeSources.filter((source) => source.sourceType === "official");
     const media = representativeSources.filter((source) => source.sourceType === "trusted_media");
@@ -202,6 +193,36 @@ export function verifyGroups(groups) {
   }
 
   return verified;
+}
+
+function representativeSourcesForGroup(group) {
+  return [
+    ...new Map(
+      contentClusters(group)
+        .map((cluster) => cluster[0])
+        .filter(Boolean)
+        .map((article) => article.source)
+        .filter(Boolean)
+        .map((source) => [source.id, source])
+    ).values()
+  ];
+}
+
+export function diagnoseGroups(groups) {
+  let multiSource = 0;
+  let official = 0;
+  let confirmed = 0;
+
+  for (const group of groups) {
+    const sources = representativeSourcesForGroup(group);
+    const media = sources.filter((source) => source.sourceType === "trusted_media");
+    const hasOfficial = sources.some((source) => source.sourceType === "official");
+    if (hasOfficial) official += 1;
+    if (media.length >= 2) multiSource += 1;
+    if (hasOfficial || media.length >= 2) confirmed += 1;
+  }
+
+  return { multiSource, official, confirmed };
 }
 
 export function classify(text) {
@@ -271,7 +292,8 @@ export function buildDigest(hits, now = new Date()) {
     }
   }
 
-  const verified = verifyGroups(groupCandidates([...candidates.values()]))
+  const groups = groupCandidates([...candidates.values()]);
+  const verified = verifyGroups(groups)
     .map((group) => {
       const text = `${group.articles[0].title} ${group.articles[0].excerpt}`;
       const summary =
@@ -305,8 +327,9 @@ export function buildDigest(hits, now = new Date()) {
     diagnostics: {
       rawHits: hits.length,
       candidates: candidates.size,
-      groups: groupCandidates([...candidates.values()]).length,
-      verified: verified.length
+      groups: groups.length,
+      verified: verified.length,
+      ...diagnoseGroups(groups)
     }
   };
 }
