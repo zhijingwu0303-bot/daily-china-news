@@ -1,13 +1,21 @@
 import { randomUUID } from "node:crypto";
 
 export const SEARCH_QUERIES = [
-  "中国 finance news",
-  "中国 economics news",
-  "中国 industries enterprise news",
-  "中国 tech news",
-  "中国 politics policy news",
-  "中国大陆 香港 澳门 台湾 新闻",
-  "China related international news"
+  "中国 金融 财经",
+  "中国 经济 统计局",
+  "中国 企业 公告 并购",
+  "中国 科技 芯片 人工智能",
+  "中国 政策 监管",
+  "香港 澳门 台湾 中国",
+  "China economy technology policy"
+];
+
+export const DIRECT_FEEDS = [
+  "https://www.chinanews.com.cn/rss/scroll-news.xml",
+  "https://www.chinanews.com.cn/rss/finance.xml",
+  "https://www.ithome.com/rss/",
+  "https://www.people.com.cn/rss/finance.xml",
+  "https://www.news.cn/fortune/news_fortune.xml"
 ];
 
 export const SOURCES = [
@@ -64,7 +72,14 @@ function tagValue(item, tag) {
   return match ? stripHtml(match[1]) : "";
 }
 
-export function parseBingRss(xml) {
+function tagAttribute(item, tag, attribute) {
+  const match = item.match(
+    new RegExp(`<${tag}(?:\\s[^>]*)?\\s${attribute}=["']([^"']+)["'][^>]*>`, "i")
+  );
+  return match ? decodeEntities(match[1]) : "";
+}
+
+export function parseFeed(xml) {
   return [...xml.matchAll(/<item(?:\s[^>]*)?>([\s\S]*?)<\/item>/gi)]
     .map((match) => {
       const item = match[1];
@@ -72,11 +87,15 @@ export function parseBingRss(xml) {
         title: tagValue(item, "title"),
         url: tagValue(item, "link"),
         description: tagValue(item, "description"),
-        pubDate: tagValue(item, "pubDate")
+        pubDate: tagValue(item, "pubDate"),
+        sourceName: tagValue(item, "source"),
+        sourceUrl: tagAttribute(item, "source", "url")
       };
     })
     .filter((item) => item.title && item.url);
 }
+
+export const parseBingRss = parseFeed;
 
 export function domainMatches(hostname, sourceDomain) {
   const host = hostname.toLowerCase().replace(/\.$/, "");
@@ -224,7 +243,7 @@ export function buildDigest(hits, now = new Date()) {
   const candidates = new Map();
 
   for (const hit of hits) {
-    const source = sourceForUrl(hit.url);
+    const source = sourceForUrl(hit.sourceUrl || hit.url);
     if (!source) continue;
 
     const publishedAt = hit.pubDate ? new Date(hit.pubDate) : now;
@@ -243,7 +262,9 @@ export function buildDigest(hits, now = new Date()) {
         source,
         url: hit.url,
         canonicalUrl,
-        title: hit.title,
+        title: hit.sourceName && hit.title.endsWith(` - ${hit.sourceName}`)
+          ? hit.title.slice(0, -(` - ${hit.sourceName}`).length)
+          : hit.title,
         excerpt: hit.description,
         publishedAt
       });
@@ -280,7 +301,13 @@ export function buildDigest(hits, now = new Date()) {
     updatedAt: now.toISOString(),
     count: verified.length,
     underfilled: verified.length < 5,
-    items: verified
+    items: verified,
+    diagnostics: {
+      rawHits: hits.length,
+      candidates: candidates.size,
+      groups: groupCandidates([...candidates.values()]).length,
+      verified: verified.length
+    }
   };
 }
 
@@ -295,13 +322,43 @@ export async function fetchBingNewsRss(query, fetchImpl = fetch) {
     }
   });
   if (!response.ok) throw new Error(`Bing News RSS failed: ${response.status}`);
-  return parseBingRss(await response.text());
+  return parseFeed(await response.text());
+}
+
+export async function fetchGoogleNewsRss(query, fetchImpl = fetch) {
+  const url = new URL("https://news.google.com/rss/search");
+  url.searchParams.set("q", query);
+  url.searchParams.set("hl", "zh-CN");
+  url.searchParams.set("gl", "CN");
+  url.searchParams.set("ceid", "CN:zh-Hans");
+
+  const response = await fetchImpl(url, {
+    headers: {
+      "User-Agent": "DailyChinaNews/1.0 (+personal news reader)"
+    }
+  });
+  if (!response.ok) throw new Error(`Google News RSS failed: ${response.status}`);
+  return parseFeed(await response.text());
+}
+
+export async function fetchDirectFeed(url, fetchImpl = fetch) {
+  const response = await fetchImpl(url, {
+    headers: {
+      "User-Agent": "DailyChinaNews/1.0 (+personal news reader)"
+    }
+  });
+  if (!response.ok) throw new Error(`Direct feed failed: ${response.status}`);
+  return parseFeed(await response.text());
 }
 
 export async function fetchLatestDigest(fetchImpl = fetch) {
-  const results = await Promise.allSettled(
-    SEARCH_QUERIES.map((query) => fetchBingNewsRss(query, fetchImpl))
-  );
+  const results = await Promise.allSettled([
+    ...SEARCH_QUERIES.map((query) => fetchGoogleNewsRss(query, fetchImpl)),
+    ...DIRECT_FEEDS.map((url) => fetchDirectFeed(url, fetchImpl))
+  ]);
   const hits = results.flatMap((result) => (result.status === "fulfilled" ? result.value : []));
-  return buildDigest(hits);
+  const digest = buildDigest(hits);
+  digest.diagnostics.sourcesSucceeded = results.filter((result) => result.status === "fulfilled").length;
+  digest.diagnostics.sourcesFailed = results.filter((result) => result.status === "rejected").length;
+  return digest;
 }

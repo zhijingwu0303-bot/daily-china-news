@@ -1,15 +1,20 @@
 import { fetchLatestDigest } from "./lib.mjs";
 
-export async function handler() {
+export async function handler(event) {
   try {
     const digest = await fetchLatestDigest();
+    const { diagnostics, ...publicDigest } = digest;
     return {
       statusCode: 200,
       headers: {
         "content-type": "application/json; charset=utf-8",
         "cache-control": "public, max-age=300, s-maxage=1800"
       },
-      body: JSON.stringify(digest)
+      body: JSON.stringify(
+        event?.queryStringParameters?.debug === "1"
+          ? { ...publicDigest, diagnostics }
+          : publicDigest
+      )
     };
   } catch (error) {
     return {
