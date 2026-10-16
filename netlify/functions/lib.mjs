@@ -63,6 +63,7 @@ function decodeEntities(value) {
     .replace(/&gt;/g, ">")
     .replace(/&quot;/g, '"')
     .replace(/&#39;|&apos;/g, "'")
+    .replace(/&nbsp;/gi, " ")
     .replace(/&#(\d+);/g, (_, code) => String.fromCodePoint(Number(code)))
     .replace(/&#x([0-9a-f]+);/gi, (_, code) => String.fromCodePoint(Number.parseInt(code, 16)));
 }
@@ -109,6 +110,7 @@ export const parseBingRss = parseFeed;
 export function domainMatches(hostname, sourceDomain) {
   const host = hostname.toLowerCase().replace(/\.$/, "");
   const domain = sourceDomain.toLowerCase().replace(/\.$/, "");
+  if (domain === "gov.cn") return host === "gov.cn" || host === "www.gov.cn";
   return host === domain || host.endsWith(`.${domain}`);
 }
 

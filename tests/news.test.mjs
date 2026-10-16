@@ -5,6 +5,8 @@ import {
   classify,
   groupCandidates,
   parseBingRss,
+  sourceForUrl,
+  stripHtml,
   verifyGroups
 } from "../netlify/functions/lib.mjs";
 
@@ -128,4 +130,13 @@ test("rejects contradictory market-direction reports", () => {
     ]
   ]);
   assert.equal(groups.length, 0);
+});
+
+test("cleans non-breaking spaces from summaries", () => {
+  assert.equal(stripHtml("第一财经&nbsp;&nbsp;消息"), "第一财经 消息");
+});
+
+test("does not treat every gov.cn subdomain as the central government", () => {
+  assert.equal(sourceForUrl("https://www.gov.cn/zhengce")?.id, "gov-cn");
+  assert.equal(sourceForUrl("https://www.gdjb.gov.cn/notice"), null);
 });
