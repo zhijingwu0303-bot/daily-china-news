@@ -2,7 +2,7 @@ const newsElement = document.querySelector("#news");
 const metaElement = document.querySelector("#meta");
 const tagsElement = document.querySelector("#tags");
 const refreshButton = document.querySelector("#refresh");
-const apiVersion = "20261017-3";
+const apiVersion = "20261017-4";
 
 let allItems = [];
 let activeTag = "";

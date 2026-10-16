@@ -9,7 +9,9 @@ export const SEARCH_QUERIES = [
   "香港 澳门 台湾 中国",
   "(site:yicai.com OR site:cls.cn OR site:21jingji.com OR site:stcn.com OR site:cnstock.com) 中国",
   "(site:thepaper.cn OR site:jiemian.com OR site:caixin.com) 中国",
-  "(国务院 OR 国家发展改革委 OR 商务部 OR 中国人民银行 OR 证监会 OR 统计局) 中国 政策 数据"
+  "(国务院 OR 国家发展改革委 OR 商务部 OR 中国人民银行 OR 证监会 OR 统计局) 中国 政策 数据",
+  "(site:csrc.gov.cn OR site:pbc.gov.cn OR site:stats.gov.cn) 公告 数据",
+  "(site:wallstreetcn.com OR site:36kr.com OR site:ithome.com OR site:cls.cn) 中国 公司"
 ];
 
 export const DIRECT_FEEDS = [
