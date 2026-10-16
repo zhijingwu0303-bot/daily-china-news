@@ -472,7 +472,7 @@ export async function fetchBingNewsRss(query, fetchImpl = fetch) {
 
 export async function fetchGoogleNewsRss(query, fetchImpl = fetch) {
   const url = new URL("https://news.google.com/rss/search");
-  url.searchParams.set("q", query);
+  url.searchParams.set("q", `${query} when:2d`);
   url.searchParams.set("hl", "zh-CN");
   url.searchParams.set("gl", "CN");
   url.searchParams.set("ceid", "CN:zh-Hans");
