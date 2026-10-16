@@ -394,6 +394,10 @@ export function buildDigest(hits, now = new Date()) {
       source: candidate.source.id,
       publishedAt: candidate.publishedAt.toISOString()
     }));
+  const candidateSourceCounts = [...candidates.values()].reduce((counts, candidate) => {
+    counts[candidate.source.id] = (counts[candidate.source.id] ?? 0) + 1;
+    return counts;
+  }, {});
   const verifiedGroups = verifyGroups(groups);
   const verifiedSamples = verifiedGroups.slice(0, 12).map((group) => ({
     lead: group.articles[0].title,
@@ -437,6 +441,7 @@ export function buildDigest(hits, now = new Date()) {
       rawHits: hits.length,
       candidates: candidates.size,
       candidateSamples,
+      candidateSourceCounts,
       groups: groups.length,
       verified: verified.length,
       ...diagnoseGroups(groups),
