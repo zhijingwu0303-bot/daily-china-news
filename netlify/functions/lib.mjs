@@ -344,7 +344,15 @@ export function buildDigest(hits, now = new Date()) {
       source: candidate.source.id,
       publishedAt: candidate.publishedAt.toISOString()
     }));
-  const verified = verifyGroups(groups)
+  const verifiedGroups = verifyGroups(groups);
+  const verifiedSamples = verifiedGroups.slice(0, 12).map((group) => ({
+    lead: group.articles[0].title,
+    members: group.articles.map((article) => ({
+      title: article.title,
+      source: article.source.id
+    }))
+  }));
+  const verified = verifiedGroups
     .map((group) => {
       const text = `${group.articles[0].title} ${group.articles[0].excerpt}`;
       const summary =
@@ -381,7 +389,8 @@ export function buildDigest(hits, now = new Date()) {
       candidateSamples,
       groups: groups.length,
       verified: verified.length,
-      ...diagnoseGroups(groups)
+      ...diagnoseGroups(groups),
+      verifiedSamples
     }
   };
 }
