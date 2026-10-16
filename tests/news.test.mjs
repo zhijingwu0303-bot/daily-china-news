@@ -84,8 +84,6 @@ test("builds a latest-only digest", () => {
   const digest = buildDigest(parseBingRss(rss), new Date("2026-10-16T13:00:00Z"));
   assert.equal(digest.count, 1);
   assert.equal(digest.items[0].title, "中国公布最新经济数据");
-  assert.equal(digest.tokenUsage, 0);
-  assert.equal(digest.estimatedCostUsd, 0);
 });
 
 test("classifies business and economic news", () => {

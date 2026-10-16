@@ -1,6 +1,5 @@
 const newsElement = document.querySelector("#news");
 const metaElement = document.querySelector("#meta");
-const costElement = document.querySelector("#cost");
 const tagsElement = document.querySelector("#tags");
 const refreshButton = document.querySelector("#refresh");
 
@@ -98,7 +97,6 @@ async function loadNews() {
     metaElement.textContent = `${data.count} 条 · 更新于 ${formatDate(data.updatedAt)}${
       data.underfilled ? " · 今日通过验证的新闻不足 5 条" : ""
     }`;
-    costElement.textContent = `AI token: ${data.tokenUsage} · 预估费用: $${data.estimatedCostUsd.toFixed(2)}`;
     renderTags();
     renderItems();
   } catch (error) {

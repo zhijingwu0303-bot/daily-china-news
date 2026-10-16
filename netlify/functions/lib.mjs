@@ -280,8 +280,6 @@ export function buildDigest(hits, now = new Date()) {
     updatedAt: now.toISOString(),
     count: verified.length,
     underfilled: verified.length < 5,
-    tokenUsage: 0,
-    estimatedCostUsd: 0,
     items: verified
   };
 }
