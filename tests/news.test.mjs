@@ -3,6 +3,7 @@ import test from "node:test";
 import {
   buildDigest,
   classify,
+  fetchArticleSummary,
   groupCandidates,
   parseBingRss,
   sourceForUrl,
@@ -139,4 +140,13 @@ test("cleans non-breaking spaces from summaries", () => {
 test("does not treat every gov.cn subdomain as the central government", () => {
   assert.equal(sourceForUrl("https://www.gov.cn/zhengce")?.id, "gov-cn");
   assert.equal(sourceForUrl("https://www.gdjb.gov.cn/notice"), null);
+});
+
+test("extracts a meaningful article description", async () => {
+  const fetchImpl = async () =>
+    new Response(
+      '<html><head><meta name="description" content="商务部发布公告，就技术出口限制目录公开征求意见，并说明人工智能等技术的管理范围。"></head></html>'
+    );
+  const summary = await fetchArticleSummary("https://example.com/article", fetchImpl);
+  assert.match(summary, /商务部发布公告/);
 });

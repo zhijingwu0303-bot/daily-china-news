@@ -1,4 +1,5 @@
 import { randomUUID } from "node:crypto";
+import { GoogleDecoder } from "google-news-url-decoder";
 
 export const SEARCH_QUERIES = [
   "中国 金融 财经",
@@ -527,13 +528,112 @@ export async function fetchDirectFeed(url, fetchImpl = fetch) {
   return parseFeed(await response.text());
 }
 
+function isGoogleNewsUrl(value) {
+  return value.startsWith("https://news.google.com/rss/articles/");
+}
+
+function decodeMetaContent(html, name) {
+  const patterns = [
+    new RegExp(
+      `<meta[^>]+(?:name|property)=["']${name}["'][^>]+content=["']([^"']+)["']`,
+      "i"
+    ),
+    new RegExp(
+      `<meta[^>]+content=["']([^"']+)["'][^>]+(?:name|property)=["']${name}["']`,
+      "i"
+    )
+  ];
+  for (const pattern of patterns) {
+    const match = html.match(pattern);
+    if (match) return stripHtml(match[1]);
+  }
+  return "";
+}
+
+export async function fetchArticleSummary(url, fetchImpl = fetch) {
+  try {
+    const response = await fetchImpl(url, {
+      signal: AbortSignal.timeout(3_500),
+      headers: {
+        "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 Chrome/126 Safari/537.36",
+        "Accept-Language": "zh-CN,zh;q=0.9"
+      }
+    });
+    if (!response.ok) return "";
+    const html = await response.text();
+    const meta =
+      decodeMetaContent(html, "description") ||
+      decodeMetaContent(html, "og:description") ||
+      decodeMetaContent(html, "twitter:description");
+    if (meta.length >= 30) return meta.slice(0, 220);
+
+    const paragraphs = [...html.matchAll(/<p(?:\s[^>]*)?>([\s\S]*?)<\/p>/gi)]
+      .map((match) => stripHtml(match[1]))
+      .filter((value) => value.length >= 30);
+    return paragraphs[0]?.slice(0, 220) ?? "";
+  } catch {
+    return "";
+  }
+}
+
+async function enrichDigest(digest, fetchImpl = fetch) {
+  const decoder = new GoogleDecoder();
+  const googleUrls = [
+    ...new Set(
+      digest.items.flatMap((item) => item.sources.map((source) => source.url)).filter(isGoogleNewsUrl)
+    )
+  ];
+
+  const decoded = new Map();
+  if (googleUrls.length > 0) {
+    try {
+      const results = await decoder.decodeBatch(googleUrls);
+      googleUrls.forEach((url, index) => {
+        const result = results[index];
+        if (result?.status && result.decoded_url) decoded.set(url, result.decoded_url);
+      });
+    } catch {}
+  }
+
+  const enrichedItems = [];
+  for (const item of digest.items) {
+    const sources = item.sources
+      .map((source) => ({
+        ...source,
+        url: isGoogleNewsUrl(source.url) ? decoded.get(source.url) : source.url
+      }))
+      .filter((source) => source.url);
+
+    if (sources.length === 0) continue;
+
+    const articleSummary = await fetchArticleSummary(sources[0].url, fetchImpl);
+    enrichedItems.push({
+      ...item,
+      summary: articleSummary || item.summary,
+      sources
+    });
+  }
+
+  return {
+    ...digest,
+    count: enrichedItems.length,
+    underfilled: enrichedItems.length < 5,
+    items: enrichedItems,
+    diagnostics: {
+      ...digest.diagnostics,
+      resolvedGoogleUrls: decoded.size,
+      unresolvedGoogleUrls: googleUrls.length - decoded.size
+    }
+  };
+}
+
 export async function fetchLatestDigest(fetchImpl = fetch) {
   const results = await Promise.allSettled([
     ...SEARCH_QUERIES.map((query) => fetchGoogleNewsRss(query, fetchImpl)),
     ...DIRECT_FEEDS.map((url) => fetchDirectFeed(url, fetchImpl))
   ]);
   const hits = results.flatMap((result) => (result.status === "fulfilled" ? result.value : []));
-  const digest = buildDigest(hits);
+  const digest = await enrichDigest(buildDigest(hits), fetchImpl);
   digest.diagnostics.sourcesSucceeded = results.filter((result) => result.status === "fulfilled").length;
   digest.diagnostics.sourcesFailed = results.filter((result) => result.status === "rejected").length;
   return digest;
