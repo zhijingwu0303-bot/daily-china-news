@@ -449,10 +449,7 @@ export function buildDigest(hits, now = new Date()) {
   const verified = verifiedGroups
     .map((group) => {
       const text = `${group.articles[0].title} ${group.articles[0].excerpt}`;
-      const summary =
-        group.articles[0].excerpt.length > 260
-          ? `${group.articles[0].excerpt.slice(0, 260)}…`
-          : group.articles[0].excerpt;
+      const summary = group.articles[0].excerpt.slice(0, 1_000);
       return {
         id: group.key,
         title: group.articles[0].title,
@@ -605,33 +602,29 @@ export function cleanSummary(value, title) {
   const completeSentenceEnd = Math.max(
     summary.lastIndexOf("。"),
     summary.lastIndexOf("！"),
-    summary.lastIndexOf("？"),
-    summary.lastIndexOf("."),
-    summary.lastIndexOf("!"),
-    summary.lastIndexOf("?")
+    summary.lastIndexOf("？")
   );
-  if (!/[。！？.!?]$/.test(summary) && completeSentenceEnd >= 25) {
+  const endsWithCompleteSentence = /[。！？]$/.test(summary);
+  if (!endsWithCompleteSentence && completeSentenceEnd >= 25) {
     return summary.slice(0, completeSentenceEnd + 1);
   }
-  if (summary.length <= 320) return summary;
+  if (summary.length <= 320) {
+    return endsWithCompleteSentence || summary.length < 80 ? summary : "";
+  }
 
   const window = summary.slice(0, 320);
   const sentenceEnd = Math.max(
     window.lastIndexOf("。"),
     window.lastIndexOf("！"),
-    window.lastIndexOf("？"),
-    window.lastIndexOf("."),
-    window.lastIndexOf("!"),
-    window.lastIndexOf("?")
+    window.lastIndexOf("？")
   );
   if (sentenceEnd >= 80) return window.slice(0, sentenceEnd + 1);
 
   const clauseEnd = Math.max(
     window.lastIndexOf("，"),
-    window.lastIndexOf("；"),
-    window.lastIndexOf(";")
+    window.lastIndexOf("；")
   );
-  return clauseEnd >= 80 ? `${window.slice(0, clauseEnd)}…` : `${window}…`;
+  return clauseEnd >= 80 ? `${window.slice(0, clauseEnd)}。` : "";
 }
 
 async function enrichDigest(digest, fetchImpl = fetch) {
