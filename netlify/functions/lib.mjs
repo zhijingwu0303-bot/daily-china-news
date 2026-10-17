@@ -577,6 +577,18 @@ export async function fetchArticleSummary(url, fetchImpl = fetch) {
   }
 }
 
+export function cleanSummary(value, title) {
+  let summary = stripHtml(value);
+  const normalizedTitle = normalizeTitle(title);
+  const normalizedSummary = normalizeTitle(summary);
+
+  if (normalizedSummary.startsWith(normalizedTitle)) {
+    summary = summary.slice(title.length).replace(/^[\s:：\-—|丨]+/, "");
+  }
+  if (summary.length < 25 || similarity(summary, title) >= 0.75) return "";
+  return summary.slice(0, 220);
+}
+
 async function enrichDigest(digest, fetchImpl = fetch) {
   const decoder = new GoogleDecoder();
   const googleUrls = [
@@ -607,10 +619,14 @@ async function enrichDigest(digest, fetchImpl = fetch) {
 
     if (sources.length === 0) continue;
 
-    const articleSummary = await fetchArticleSummary(sources[0].url, fetchImpl);
+    const articleSummary = cleanSummary(
+      await fetchArticleSummary(sources[0].url, fetchImpl),
+      item.title
+    );
+    const fallbackSummary = cleanSummary(item.summary, item.title);
     enrichedItems.push({
       ...item,
-      summary: articleSummary || item.summary,
+      summary: articleSummary || fallbackSummary,
       sources
     });
   }

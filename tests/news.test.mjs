@@ -3,6 +3,7 @@ import test from "node:test";
 import {
   buildDigest,
   classify,
+  cleanSummary,
   fetchArticleSummary,
   groupCandidates,
   parseBingRss,
@@ -149,4 +150,11 @@ test("extracts a meaningful article description", async () => {
     );
   const summary = await fetchArticleSummary("https://example.com/article", fetchImpl);
   assert.match(summary, /商务部发布公告/);
+});
+
+test("does not repeat the headline as the summary", () => {
+  assert.equal(
+    cleanSummary("中国稀土：预计前三季度净利润同比增长88.96%-140.99% 第一财经", "中国稀土：预计前三季度净利润同比增长88.96%-140.99%"),
+    ""
+  );
 });
