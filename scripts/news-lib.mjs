@@ -387,7 +387,7 @@ function canonicalizeUrl(value) {
 }
 
 export function buildDigest(hits, now = new Date()) {
-  const cutoff = now.getTime() - 36 * 60 * 60 * 1000;
+  const cutoff = now.getTime() - 24 * 60 * 60 * 1000;
   const candidates = new Map();
   const rawHostCounts = {};
 
@@ -460,7 +460,7 @@ export function buildDigest(hits, now = new Date()) {
         tags: classify(text),
         importance: importance(group),
         publishedAt: new Date(
-          Math.max(...group.articles.map((article) => article.publishedAt.getTime()))
+          Math.min(...group.articles.map((article) => article.publishedAt.getTime()))
         ).toISOString(),
         sources: [...new Map(group.articles.map((article) => [article.source.id, article])).values()].map(
           (article) => ({
@@ -571,7 +571,7 @@ export async function fetchArticleSummary(url, fetchImpl = fetch) {
       decodeMetaContent(html, "description") ||
       decodeMetaContent(html, "og:description") ||
       decodeMetaContent(html, "twitter:description");
-    if (meta.length >= 30) return meta.slice(0, 220);
+    if (meta.length >= 30) return meta.slice(0, 650);
 
     const articleMatch =
       html.match(/<article(?:\s[^>]*)?>([\s\S]*?)<\/article>/i) ??
@@ -580,7 +580,7 @@ export async function fetchArticleSummary(url, fetchImpl = fetch) {
     const paragraphs = [...contentHtml.matchAll(/<p(?:\s[^>]*)?>([\s\S]*?)<\/p>/gi)]
       .map((match) => stripHtml(match[1]))
       .filter((value) => value.length >= 30);
-    return paragraphs[0]?.slice(0, 220) ?? "";
+    return paragraphs[0]?.slice(0, 650) ?? "";
   } catch {
     return "";
   }
@@ -602,7 +602,36 @@ export function cleanSummary(value, title) {
     summary = summary.slice(title.length).replace(/^[\s:：\-—|丨]+/, "");
   }
   if (summary.length < 25 || similarity(summary, title) >= 0.75) return "";
-  return summary.slice(0, 220);
+  const completeSentenceEnd = Math.max(
+    summary.lastIndexOf("。"),
+    summary.lastIndexOf("！"),
+    summary.lastIndexOf("？"),
+    summary.lastIndexOf("."),
+    summary.lastIndexOf("!"),
+    summary.lastIndexOf("?")
+  );
+  if (!/[。！？.!?]$/.test(summary) && completeSentenceEnd >= 25) {
+    return summary.slice(0, completeSentenceEnd + 1);
+  }
+  if (summary.length <= 320) return summary;
+
+  const window = summary.slice(0, 320);
+  const sentenceEnd = Math.max(
+    window.lastIndexOf("。"),
+    window.lastIndexOf("！"),
+    window.lastIndexOf("？"),
+    window.lastIndexOf("."),
+    window.lastIndexOf("!"),
+    window.lastIndexOf("?")
+  );
+  if (sentenceEnd >= 80) return window.slice(0, sentenceEnd + 1);
+
+  const clauseEnd = Math.max(
+    window.lastIndexOf("，"),
+    window.lastIndexOf("；"),
+    window.lastIndexOf(";")
+  );
+  return clauseEnd >= 80 ? `${window.slice(0, clauseEnd)}…` : `${window}…`;
 }
 
 async function enrichDigest(digest, fetchImpl = fetch) {

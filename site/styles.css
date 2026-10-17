@@ -56,17 +56,6 @@ h1 {
   font-size: 14px;
 }
 
-.refresh {
-  border: 1px solid var(--ink);
-  border-radius: 6px;
-  background: var(--ink);
-  color: white;
-  padding: 9px 16px;
-  cursor: pointer;
-}
-
-.refresh:disabled { cursor: wait; opacity: 0.55; }
-
 .status {
   display: flex;
   justify-content: space-between;

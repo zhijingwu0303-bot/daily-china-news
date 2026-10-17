@@ -180,3 +180,29 @@ test("rejects roundup articles as event sources", () => {
   ]);
   assert.equal(digest.count, 0);
 });
+
+test("uses the earliest publication time for an event", () => {
+  const now = new Date("2026-10-17T13:00:00Z");
+  const base = {
+    title: "商务部发布重要公告",
+    description: "商务部发布公告并介绍政策安排。",
+    sourceUrl: "https://www.gov.cn/",
+    url: "https://www.gov.cn/a"
+  };
+  const digest = buildDigest(
+    [
+      { ...base, pubDate: "Fri, 16 Oct 2026 14:00:00 GMT" },
+      { ...base, pubDate: "Fri, 16 Oct 2026 13:00:00 GMT", url: "https://www.gov.cn/b" }
+    ],
+    now
+  );
+  assert.equal(digest.items[0].publishedAt, "2026-10-16T13:00:00.000Z");
+});
+
+test("keeps summaries to the last complete sentence", () => {
+  const summary =
+    "第一句话介绍新闻背景和主要事实，提供了足够的信息。第二句话继续说明政策影响和行业反应，也包含了很多重要细节。第三句话没有结束";
+  const cleaned = cleanSummary(summary, "另一条标题");
+  assert.ok(cleaned.endsWith("。"));
+  assert.ok(!cleaned.endsWith("结束"));
+});

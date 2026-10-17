@@ -1,7 +1,6 @@
 const newsElement = document.querySelector("#news");
 const metaElement = document.querySelector("#meta");
 const tagsElement = document.querySelector("#tags");
-const refreshButton = document.querySelector("#refresh");
 
 let allItems = [];
 let activeTag = "";
@@ -84,8 +83,7 @@ function escapeAttribute(value) {
   return escapeHtml(value).replace(/`/g, "&#96;");
 }
 
-async function loadNews(forceRefresh = false) {
-  refreshButton.disabled = true;
+async function loadNews() {
   metaElement.textContent = "正在获取新闻…";
 
   try {
@@ -102,11 +100,8 @@ async function loadNews(forceRefresh = false) {
   } catch (error) {
     metaElement.textContent = error instanceof Error ? error.message : "获取失败";
     newsElement.innerHTML = '<div class="empty">新闻获取失败，请点击右上角刷新重试。</div>';
-  } finally {
-    refreshButton.disabled = false;
   }
 }
 
-refreshButton.addEventListener("click", () => loadNews(true));
-loadNews(false);
-setInterval(() => loadNews(false), 30 * 60 * 1000);
+loadNews();
+setInterval(loadNews, 30 * 60 * 1000);
