@@ -168,3 +168,15 @@ test("rejects generic website boilerplate as a summary", () => {
     ""
   );
 });
+
+test("rejects roundup articles as event sources", () => {
+  const digest = buildDigest([
+    {
+      title: "IT早报：特斯拉 Roadster 中国官网开放预订",
+      url: "https://www.ithome.com/1/014/199.htm",
+      description: "今日科技资讯汇总",
+      pubDate: new Date().toUTCString()
+    }
+  ]);
+  assert.equal(digest.count, 0);
+});
