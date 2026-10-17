@@ -566,7 +566,15 @@ export async function fetchArticleSummary(url, fetchImpl = fetch) {
       }
     });
     if (!response.ok) return "";
-    const html = await response.text();
+    const buffer = await response.arrayBuffer();
+    let html = new TextDecoder("utf-8").decode(buffer);
+    const charset = html
+      .slice(0, 2_000)
+      .match(/charset\s*=\s*["']?([a-zA-Z0-9_-]+)/i)?.[1]
+      ?.toLowerCase();
+    if (charset === "gb2312" || charset === "gbk" || charset === "gb18030") {
+      html = new TextDecoder("gbk").decode(buffer);
+    }
     const meta =
       decodeMetaContent(html, "description") ||
       decodeMetaContent(html, "og:description") ||
@@ -577,9 +585,16 @@ export async function fetchArticleSummary(url, fetchImpl = fetch) {
       html.match(/<article(?:\s[^>]*)?>([\s\S]*?)<\/article>/i) ??
       html.match(/<main(?:\s[^>]*)?>([\s\S]*?)<\/main>/i);
     const contentHtml = articleMatch?.[1] ?? html;
-    const paragraphs = [...contentHtml.matchAll(/<p(?:\s[^>]*)?>([\s\S]*?)<\/p>/gi)]
+    let paragraphs = [...contentHtml.matchAll(/<p(?:\s[^>]*)?>([\s\S]*?)<\/p>/gi)]
       .map((match) => stripHtml(match[1]))
       .filter((value) => value.length >= 30);
+    if (paragraphs.length === 0) {
+      paragraphs = contentHtml
+        .split(/<p(?:\s[^>]*)?>/i)
+        .slice(1)
+        .map((chunk) => stripHtml(chunk.split(/<p(?:\s[^>]*)?>|<\/article>|<\/main>/i)[0]))
+        .filter((value) => value.length >= 30);
+    }
     return paragraphs[0]?.slice(0, 650) ?? "";
   } catch {
     return "";

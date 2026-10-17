@@ -152,6 +152,15 @@ test("extracts a meaningful article description", async () => {
   assert.match(summary, /商务部发布公告/);
 });
 
+test("extracts summaries from pages with unclosed paragraph tags", async () => {
+  const fetchImpl = async () =>
+    new Response(
+      "<html><body><p>外交部发言人毛宁主持记者会，并回答了中国购物开箱在海外走红的问题。<p>后续内容"
+    );
+  const summary = await fetchArticleSummary("https://example.com/article", fetchImpl);
+  assert.match(summary, /外交部发言人毛宁/);
+});
+
 test("does not repeat the headline as the summary", () => {
   assert.equal(
     cleanSummary("中国稀土：预计前三季度净利润同比增长88.96%-140.99% 第一财经", "中国稀土：预计前三季度净利润同比增长88.96%-140.99%"),
