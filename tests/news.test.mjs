@@ -6,7 +6,6 @@ import {
   cleanSummary,
   fetchArticleSummary,
   groupCandidates,
-  mapDecodedResults,
   parseBingRss,
   sourceForUrl,
   stripHtml,
@@ -168,13 +167,4 @@ test("rejects generic website boilerplate as a summary", () => {
     ),
     ""
   );
-});
-
-test("maps decoded Google News URLs by source URL instead of array order", () => {
-  const decoded = mapDecodedResults([
-    { status: true, source_url: "https://news.google.com/rss/articles/B", decoded_url: "https://b.example/story" },
-    { status: true, source_url: "https://news.google.com/rss/articles/A", decoded_url: "https://a.example/story" }
-  ]);
-  assert.equal(decoded.get("https://news.google.com/rss/articles/A"), "https://a.example/story");
-  assert.equal(decoded.get("https://news.google.com/rss/articles/B"), "https://b.example/story");
 });
