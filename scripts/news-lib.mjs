@@ -449,7 +449,10 @@ export function buildDigest(hits, now = new Date()) {
   const verified = verifiedGroups
     .map((group) => {
       const text = `${group.articles[0].title} ${group.articles[0].excerpt}`;
-      const summary = group.articles[0].excerpt.slice(0, 1_000);
+      const summary =
+        group.articles
+          .map((article) => cleanSummary(article.excerpt, group.articles[0].title))
+          .find(Boolean) ?? "";
       return {
         id: group.key,
         title: group.articles[0].title,
