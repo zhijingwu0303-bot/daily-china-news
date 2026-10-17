@@ -1,5 +1,7 @@
 # 中国每日新闻 GitHub Pages 版
 
+线上地址：https://zhijingwu0303-bot.github.io/daily-china-news/
+
 这是一个免费的个人新闻网站：
 
 - GitHub Actions 每天中国时间 21:00 自动更新。
