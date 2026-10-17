@@ -255,9 +255,7 @@ function dateFromUrl(value) {
 export function groupCandidates(candidates) {
   const groups = [];
   for (const candidate of candidates) {
-    const group = groups.find((items) =>
-      items.some((item) => sameEvent(item.title, candidate.title))
-    );
+    const group = groups.find((items) => sameEvent(items[0].title, candidate.title));
     if (group) group.push(candidate);
     else groups.push([candidate]);
   }
