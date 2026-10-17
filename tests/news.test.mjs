@@ -158,3 +158,13 @@ test("does not repeat the headline as the summary", () => {
     ""
   );
 });
+
+test("rejects generic website boilerplate as a summary", () => {
+  assert.equal(
+    cleanSummary(
+      "打开微信，点击底部的“发现”，使用“扫一扫”即可将网页分享至朋友圈。",
+      "某条新闻"
+    ),
+    ""
+  );
+});

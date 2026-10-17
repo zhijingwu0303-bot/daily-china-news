@@ -568,7 +568,11 @@ export async function fetchArticleSummary(url, fetchImpl = fetch) {
       decodeMetaContent(html, "twitter:description");
     if (meta.length >= 30) return meta.slice(0, 220);
 
-    const paragraphs = [...html.matchAll(/<p(?:\s[^>]*)?>([\s\S]*?)<\/p>/gi)]
+    const articleMatch =
+      html.match(/<article(?:\s[^>]*)?>([\s\S]*?)<\/article>/i) ??
+      html.match(/<main(?:\s[^>]*)?>([\s\S]*?)<\/main>/i);
+    const contentHtml = articleMatch?.[1] ?? html;
+    const paragraphs = [...contentHtml.matchAll(/<p(?:\s[^>]*)?>([\s\S]*?)<\/p>/gi)]
       .map((match) => stripHtml(match[1]))
       .filter((value) => value.length >= 30);
     return paragraphs[0]?.slice(0, 220) ?? "";
@@ -579,6 +583,13 @@ export async function fetchArticleSummary(url, fetchImpl = fetch) {
 
 export function cleanSummary(value, title) {
   let summary = stripHtml(value);
+  if (
+    /打开微信.*扫一扫|访问安全|检测当前网络环境|第一财经官方网站|7X24小时提供股市行情|点击.*分享到朋友圈|责任编辑[：:]/.test(
+      summary
+    )
+  ) {
+    return "";
+  }
   const normalizedTitle = normalizeTitle(title);
   const normalizedSummary = normalizeTitle(summary);
 
@@ -619,10 +630,14 @@ async function enrichDigest(digest, fetchImpl = fetch) {
 
     if (sources.length === 0) continue;
 
-    const articleSummary = cleanSummary(
-      await fetchArticleSummary(sources[0].url, fetchImpl),
-      item.title
-    );
+    let articleSummary = "";
+    for (const source of sources.slice(0, 4)) {
+      articleSummary = cleanSummary(
+        await fetchArticleSummary(source.url, fetchImpl),
+        item.title
+      );
+      if (articleSummary) break;
+    }
     const fallbackSummary = cleanSummary(item.summary, item.title);
     enrichedItems.push({
       ...item,
