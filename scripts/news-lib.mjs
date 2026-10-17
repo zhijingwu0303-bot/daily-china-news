@@ -608,9 +608,7 @@ export function cleanSummary(value, title) {
   if (!endsWithCompleteSentence && completeSentenceEnd >= 25) {
     return summary.slice(0, completeSentenceEnd + 1);
   }
-  if (summary.length <= 320) {
-    return endsWithCompleteSentence || summary.length < 80 ? summary : "";
-  }
+  if (summary.length <= 320) return endsWithCompleteSentence ? summary : "";
 
   const window = summary.slice(0, 320);
   const sentenceEnd = Math.max(
