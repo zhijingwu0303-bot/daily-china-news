@@ -612,10 +612,7 @@ async function enrichDigest(digest, fetchImpl = fetch) {
   if (googleUrls.length > 0) {
     try {
       const results = await decoder.decodeBatch(googleUrls);
-      googleUrls.forEach((url, index) => {
-        const result = results[index];
-        if (result?.status && result.decoded_url) decoded.set(url, result.decoded_url);
-      });
+      mapDecodedResults(results).forEach((url, sourceUrl) => decoded.set(sourceUrl, url));
     } catch {}
   }
 
@@ -657,6 +654,16 @@ async function enrichDigest(digest, fetchImpl = fetch) {
       unresolvedGoogleUrls: googleUrls.length - decoded.size
     }
   };
+}
+
+export function mapDecodedResults(results) {
+  const decoded = new Map();
+  for (const result of results) {
+    if (result?.status && result.source_url && result.decoded_url) {
+      decoded.set(result.source_url, result.decoded_url);
+    }
+  }
+  return decoded;
 }
 
 export async function fetchLatestDigest(fetchImpl = fetch) {
