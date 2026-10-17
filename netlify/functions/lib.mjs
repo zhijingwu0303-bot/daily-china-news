@@ -465,7 +465,8 @@ export function buildDigest(hits, now = new Date()) {
         )
       };
     })
-    .sort((left, right) => right.importance - left.importance);
+    .sort((left, right) => right.importance - left.importance)
+    .map(({ importance, ...item }) => item);
 
   return {
     updatedAt: now.toISOString(),

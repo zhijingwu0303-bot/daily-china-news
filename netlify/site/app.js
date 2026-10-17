@@ -35,7 +35,7 @@ function renderItems() {
           <div>
             <h2>${escapeHtml(item.title)}</h2>
             <p class="summary">${escapeHtml(item.summary || "暂无摘要，请查看原文。")}</p>
-            <p class="meta">${formatDate(item.publishedAt)} · 重要度 ${item.importance}</p>
+            <p class="meta">${formatDate(item.publishedAt)}</p>
             <div class="links">
               ${item.sources
                 .map(
@@ -85,12 +85,13 @@ function escapeAttribute(value) {
   return escapeHtml(value).replace(/`/g, "&#96;");
 }
 
-async function loadNews() {
+async function loadNews(forceRefresh = false) {
   refreshButton.disabled = true;
   metaElement.textContent = "正在获取新闻…";
 
   try {
-    const response = await fetch(`/api/news?v=${apiVersion}`, { cache: "no-store" });
+    const suffix = forceRefresh ? "&refresh=1" : "";
+    const response = await fetch(`/api/news?v=${apiVersion}${suffix}`, { cache: "no-store" });
     const data = await response.json();
     if (!response.ok) throw new Error(data.error || "获取失败");
 
@@ -108,6 +109,6 @@ async function loadNews() {
   }
 }
 
-refreshButton.addEventListener("click", loadNews);
-loadNews();
-setInterval(loadNews, 30 * 60 * 1000);
+refreshButton.addEventListener("click", () => loadNews(true));
+loadNews(false);
+setInterval(() => loadNews(false), 30 * 60 * 1000);
