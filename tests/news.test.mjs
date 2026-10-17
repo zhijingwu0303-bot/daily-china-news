@@ -10,7 +10,7 @@ import {
   sourceForUrl,
   stripHtml,
   verifyGroups
-} from "../netlify/functions/lib.mjs";
+} from "../scripts/news-lib.mjs";
 
 const rss = `<?xml version="1.0"?>
 <rss><channel>

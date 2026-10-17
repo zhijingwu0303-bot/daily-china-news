@@ -1,54 +1,65 @@
-# 中国每日新闻 Netlify 极简版
+# 中国每日新闻 GitHub Pages 版
 
-线上地址：https://zhijing-daily-news-2026.netlify.app
+这是一个免费的个人新闻网站：
 
-这是一个只需要 Netlify 的新闻网站：
-
-- 打开网址时自动获取最近 36 小时新闻。
-- 使用免费的 Bing News RSS 搜索候选新闻。
-- 只保留官方来源和可信媒体。
-- 官方来源可单独成立；其他新闻需要至少两家独立可信媒体。
-- 相同通稿的重复转载不会当作独立来源。
-- 自动添加 finance、economics、industries、tech、politics 标签。
-- 按来源覆盖数和新鲜度排序。
+- GitHub Actions 每天中国时间 21:00 自动更新。
+- GitHub Pages 提供公开网址。
 - 只显示最新一期，不保存历史。
 - 不提供日期回顾和关键词搜索。
-- 不使用 OpenAI、Brave、Supabase、Vercel 或 Railway。
-- 不产生 token 费用。
+- 只保留已证实新闻。
+- 官方来源可以单独成立。
+- 其他新闻需要两家独立可信媒体。
+- 相同通稿和重复转载不会作为独立来源。
+- 自动消除明显的事实冲突。
+- 解析媒体原始链接并提取新闻梗概。
+- 不显示新闻重要度。
+- 不显示 token 或 AI 费用。
+- 不使用 OpenAI、Netlify、Vercel、Supabase 或 Railway。
 
-## 部署
+## 自动更新时间
 
-### 方法一：Netlify Drop
-
-1. 打开 https://app.netlify.com/drop
-2. 登录你的 Netlify 账号。
-3. 把 `daily-news-netlify.zip` 拖到页面中。
-4. 等待部署完成。
-5. Netlify 会给出类似 `https://xxxx.netlify.app` 的网址。
-
-### 方法二：Netlify CLI
-
-```bash
-npx netlify-cli login
-npx netlify-cli deploy --prod
+```text
+0 13 * * *
 ```
+
+GitHub Actions 使用 UTC。`13:00 UTC` 等于中国时间 `21:00`。
+
+GitHub 的定时任务可能延迟几分钟启动，但不需要电脑开机。
+
+## 网站结构
+
+```text
+site/
+  index.html
+  app.js
+  styles.css
+  latest.json
+
+scripts/
+  generate-latest.mjs
+  news-lib.mjs
+
+.github/workflows/deploy.yml
+```
+
+`generate-latest.mjs` 生成最新新闻，GitHub Actions 将 `site/` 发布到 GitHub Pages。
+
+## 手动重新生成
+
+在 GitHub 仓库的 Actions 页面运行 `Publish Daily News`。
 
 ## 本地测试
 
 ```bash
-npm test
+pnpm install
+node --test tests/*.test.mjs
+node scripts/generate-latest.mjs
 ```
 
 ## 调整来源
 
-编辑：
-
-```text
-netlify/functions/lib.mjs
-```
-
-修改 `SOURCES` 数组即可增加或删除来源。
+编辑 `scripts/news-lib.mjs` 中的 `SOURCES` 和 `SEARCH_QUERIES`。
 
 ## 关闭网站
 
-在 Netlify 项目的 Site configuration 中删除站点或停用部署即可。
+在 GitHub 仓库 Settings > Pages 中取消发布，或者禁用 `Publish Daily News` workflow。
