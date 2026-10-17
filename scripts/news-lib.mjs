@@ -579,7 +579,13 @@ export async function fetchArticleSummary(url, fetchImpl = fetch) {
       decodeMetaContent(html, "description") ||
       decodeMetaContent(html, "og:description") ||
       decodeMetaContent(html, "twitter:description");
-    if (meta.length >= 30) return meta.slice(0, 650);
+    if (
+      meta.length >= 30 &&
+      /[。！？.!?]$/.test(meta) &&
+      !isUnusableSummary(meta)
+    ) {
+      return meta.slice(0, 650);
+    }
 
     const articleMatch =
       html.match(/<article(?:\s[^>]*)?>([\s\S]*?)<\/article>/i) ??
@@ -603,11 +609,7 @@ export async function fetchArticleSummary(url, fetchImpl = fetch) {
 
 export function cleanSummary(value, title) {
   let summary = stripHtml(value);
-  if (
-    /打开微信.*扫一扫|访问安全|检测当前网络环境|第一财经官方网站|7X24小时提供股市行情|点击.*分享到朋友圈|责任编辑[：:]/.test(
-      summary
-    )
-  ) {
+  if (isUnusableSummary(summary)) {
     return "";
   }
   const normalizedTitle = normalizeTitle(title);
@@ -641,6 +643,12 @@ export function cleanSummary(value, title) {
     window.lastIndexOf("；")
   );
   return clauseEnd >= 80 ? `${window.slice(0, clauseEnd)}。` : "";
+}
+
+function isUnusableSummary(summary) {
+  return /打开微信.*扫一扫|访问安全|检测当前网络环境|第一财经官方网站|7X24小时提供股市行情|点击.*分享到朋友圈|责任编辑[：:]|网站导航|ICP备|网站标识码/.test(
+    summary
+  );
 }
 
 async function enrichDigest(digest, fetchImpl = fetch) {
