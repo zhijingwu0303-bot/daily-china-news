@@ -252,6 +252,12 @@ function dateFromUrl(value) {
   return null;
 }
 
+function isDigestTitle(title) {
+  return /IT早报|新闻早报|早报速览|午报|晚报速览|今日要闻|一周要闻|周末要闻|收盘日报|早间新闻/.test(
+    title
+  );
+}
+
 export function groupCandidates(candidates) {
   const groups = [];
   for (const candidate of candidates) {
@@ -392,6 +398,7 @@ export function buildDigest(hits, now = new Date()) {
     } catch {}
     const source = sourceForUrl(hit.sourceUrl || hit.url);
     if (!source) continue;
+    if (isDigestTitle(hit.title)) continue;
 
     const publishedAt = hit.pubDate ? new Date(hit.pubDate) : dateFromUrl(hit.url);
     if (!publishedAt) continue;
