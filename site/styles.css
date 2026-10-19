@@ -132,9 +132,18 @@ h1 {
 
 .links a:hover { text-decoration: underline; }
 
-.links .video-link {
+.video-badge {
+  display: inline-block;
+  margin-left: 5px;
+  padding: 0 4px;
+  border: 1px solid #f0b27a;
+  border-radius: 3px;
+  background: var(--accent-soft);
   color: #9a3412;
+  font-size: 10px;
   font-weight: 600;
+  line-height: 1.5;
+  vertical-align: 1px;
 }
 
 .item-tags {

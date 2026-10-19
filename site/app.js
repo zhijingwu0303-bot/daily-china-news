@@ -37,7 +37,7 @@ function renderItems() {
               ${item.sources
                 .map(
                   (source) =>
-                    `<a class="${source.isVideo ? "video-link" : ""}" href="${escapeAttribute(source.url)}" target="_blank" rel="noreferrer">${source.isVideo ? "视频" : "原文"} · ${escapeHtml(source.name)}</a>`
+                    `<a href="${escapeAttribute(source.url)}" target="_blank" rel="noreferrer">${escapeHtml(source.name)}${source.isVideo ? '<span class="video-badge">视频</span>' : ""}</a>`
                 )
                 .join("")}
             </div>

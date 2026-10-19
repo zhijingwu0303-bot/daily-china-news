@@ -299,6 +299,12 @@ test("runs the scheduled update before 09:00 China time", async () => {
   assert.match(workflow, /cron:\s*"45 0 \* \* \*"/);
 });
 
+test("renders source names with only a small video badge", async () => {
+  const app = await readFile(new URL("../site/app.js", import.meta.url), "utf8");
+  assert.doesNotMatch(app, />原文|<` \+ "原文|原文 ·|视频 · /);
+  assert.match(app, /class="video-badge">视频<\/span>/);
+});
+
 test("rejects roundup articles as event sources", () => {
   const digest = buildDigest([
     {
