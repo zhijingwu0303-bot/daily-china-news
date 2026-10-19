@@ -1,12 +1,14 @@
 import assert from "node:assert/strict";
+import { readFile } from "node:fs/promises";
 import test from "node:test";
 import {
   buildDigest,
   classify,
-  cleanSummary,
-  fetchArticleSummary,
+  fetchYicaiList,
   groupCandidates,
   parseBingRss,
+  parseYicaiList,
+  selectDiverseItems,
   sourceForUrl,
   stripHtml,
   verifyGroups
@@ -40,6 +42,32 @@ test("parses Bing RSS", () => {
   assert.equal(items[0].title, "中国公布最新经济数据");
 });
 
+test("parses the first-party Yicai news list", () => {
+  const html = `<script>
+    var firstlist = [{"NewsTitle":"中国经济三季报发布","NewsNotes":"统计局介绍主要数据。","CreateDate":"2026-10-19T09:30:00","url":"/news/103398866.html","VideoUrl":""}];
+  </script>`;
+  const items = parseYicaiList(html);
+
+  assert.equal(items.length, 1);
+  assert.equal(items[0].title, "中国经济三季报发布");
+  assert.equal(items[0].url, "https://www.yicai.com/news/103398866.html");
+  assert.equal(items[0].pubDate, "2026-10-19T01:30:00.000Z");
+});
+
+test("can load the dedicated Yicai video list", async () => {
+  let requestedUrl = "";
+  const fetchImpl = async (url) => {
+    requestedUrl = String(url);
+    return new Response(
+      `<script>var firstlist = [{"NewsTitle":"视频报道","NewsNotes":"","CreateDate":"2026-10-19T09:30:00","url":"/video/103398924.html","VideoUrl":"https://video.example/file.mp4"}];</script>`
+    );
+  };
+  const items = await fetchYicaiList(fetchImpl, "https://www.yicai.com/video/");
+
+  assert.equal(requestedUrl, "https://www.yicai.com/video/");
+  assert.equal(items[0].isVideo, true);
+});
+
 test("accepts independent media reports with different wording", () => {
   const items = parseBingRss(rss);
   const candidates = items.map((item, index) => ({
@@ -61,7 +89,7 @@ test("accepts independent media reports with different wording", () => {
   assert.equal(groups.length, 1);
 });
 
-test("rejects the same wire copy republished by two domains", () => {
+test("accepts one curated media source when other outlets do not cover the story", () => {
   const groups = verifyGroups([
     [
       {
@@ -71,18 +99,11 @@ test("rejects the same wire copy republished by two domains", () => {
         url: "https://reuters.com/a",
         publishedAt: new Date(),
         source: { id: "reuters", name: "Reuters", sourceType: "trusted_media", trustLevel: 1 }
-      },
-      {
-        title: "同一通稿",
-        excerpt: "完全相同的内容",
-        canonicalUrl: "https://apnews.com/b",
-        url: "https://apnews.com/b",
-        publishedAt: new Date(),
-        source: { id: "ap", name: "AP", sourceType: "trusted_media", trustLevel: 1 }
       }
     ]
   ]);
-  assert.equal(groups.length, 0);
+  assert.equal(groups.length, 1);
+  assert.equal(groups[0].sources.length, 1);
 });
 
 test("builds a latest-only digest", () => {
@@ -94,6 +115,13 @@ test("builds a latest-only digest", () => {
 test("classifies business and economic news", () => {
   assert.deepEqual(classify("国家统计局公布消费和GDP数据"), ["economics"]);
   assert.deepEqual(classify("某上市公司发布并购公告"), ["industries"]);
+  assert.ok(classify("A股收评：沪指收涨，创业板指收跌").includes("finance"));
+});
+
+test("does not classify sports, culture, or human-interest stories as industries", () => {
+  assert.deepEqual(classify("第十五届环云竹湖自行车公开赛开赛"), []);
+  assert.deepEqual(classify("顾彬：跟李白坐在一起喝酒"), []);
+  assert.deepEqual(classify("强冷空气来袭多地降温 黑龙江部分区域达到暴雪量级"), []);
 });
 
 test("groups differently worded reports about the same economic event", () => {
@@ -134,7 +162,7 @@ test("rejects contradictory market-direction reports", () => {
   assert.equal(groups.length, 0);
 });
 
-test("cleans non-breaking spaces from summaries", () => {
+test("cleans non-breaking spaces from HTML text", () => {
   assert.equal(stripHtml("第一财经&nbsp;&nbsp;消息"), "第一财经 消息");
 });
 
@@ -143,48 +171,132 @@ test("does not treat every gov.cn subdomain as the central government", () => {
   assert.equal(sourceForUrl("https://www.gdjb.gov.cn/notice"), null);
 });
 
-test("extracts a meaningful article description", async () => {
-  const fetchImpl = async () =>
-    new Response(
-      '<html><head><meta name="description" content="商务部发布公告，就技术出口限制目录公开征求意见，并说明人工智能等技术的管理范围。"></head></html>'
-    );
-  const summary = await fetchArticleSummary("https://example.com/article", fetchImpl);
-  assert.match(summary, /商务部发布公告/);
-});
-
-test("extracts summaries from pages with unclosed paragraph tags", async () => {
-  const fetchImpl = async () =>
-    new Response(
-      "<html><body><p>外交部发言人毛宁主持记者会，并回答了中国购物开箱在海外走红的问题。<p>后续内容"
-    );
-  const summary = await fetchArticleSummary("https://example.com/article", fetchImpl);
-  assert.match(summary, /外交部发言人毛宁/);
-});
-
-test("falls back to body text when meta description is truncated", async () => {
-  const fetchImpl = async () =>
-    new Response(`<html><head>
-      <meta name="description" content="外交部记者会介绍中国购物开箱在海外走红的情况（">
-    </head><body><p>外交部发言人毛宁主持记者会，并回答了外国游客来华购物和消费趋势的问题。</p></body></html>`);
-  const summary = await fetchArticleSummary("https://example.com/article", fetchImpl);
-  assert.match(summary, /外交部发言人毛宁主持记者会/);
-});
-
-test("does not repeat the headline as the summary", () => {
-  assert.equal(
-    cleanSummary("中国稀土：预计前三季度净利润同比增长88.96%-140.99% 第一财经", "中国稀土：预计前三季度净利润同比增长88.96%-140.99%"),
-    ""
+test("marks video reports and keeps their links", () => {
+  const digest = buildDigest(
+    [
+      {
+        title: "第一财经视频报道中国制造业新进展",
+        url: "https://www.yicai.com/video/123456.html",
+        description: "视频报道",
+        pubDate: new Date().toUTCString(),
+        sourceUrl: "https://www.yicai.com/"
+      }
+    ],
+    new Date()
   );
+  assert.equal(digest.count, 1);
+  assert.equal(digest.items[0].sources[0].isVideo, true);
+  assert.match(digest.items[0].sources[0].url, /yicai\.com\/video\//);
 });
 
-test("rejects generic website boilerplate as a summary", () => {
-  assert.equal(
-    cleanSummary(
-      "打开微信，点击底部的“发现”，使用“扫一扫”即可将网页分享至朋友圈。",
-      "某条新闻"
-    ),
-    ""
+test("public digest items contain headlines but no summaries", () => {
+  const now = new Date();
+  const digest = buildDigest(
+    [
+      {
+        title: "国家统计局发布最新经济数据",
+        url: "https://www.stats.gov.cn/sj/zxfb/202610/t20261019.html",
+        description: "这是一段不应出现在公开新闻数据里的摘要。",
+        pubDate: now.toUTCString(),
+        sourceUrl: "https://www.stats.gov.cn/"
+      }
+    ],
+    now
   );
+  assert.equal(digest.count, 1);
+  assert.equal("summary" in digest.items[0], false);
+  assert.equal(digest.items[0].title, "国家统计局发布最新经济数据");
+});
+
+test("shows one link per outlet and media type", () => {
+  const now = new Date();
+  const digest = buildDigest(
+    [
+      {
+        title: "中国A股收盘涨跌互现",
+        url: "https://www.chinanews.com.cn/cj/2026/10-19/1.shtml",
+        description: "",
+        pubDate: now.toUTCString(),
+        sourceUrl: "https://www.chinanews.com.cn/"
+      },
+      {
+        title: "中国A股收盘涨跌互现",
+        url: "https://www.chinanews.com.cn/cj/2026/10-19/2.shtml",
+        description: "",
+        pubDate: now.toUTCString(),
+        sourceUrl: "https://www.chinanews.com.cn/"
+      }
+    ],
+    now
+  );
+  assert.equal(digest.count, 1);
+  assert.equal(digest.items[0].sources.length, 1);
+});
+
+test("limits the digest to 20 events", () => {
+  const now = new Date();
+  const titles = [
+    "星河银行获批筹建上海分行",
+    "海岳证券完成对岭南期货收购",
+    "北辰汽车发布三季度财报",
+    "云峰芯片扩大武汉工厂产能",
+    "青禾基金下调科技ETF管理费率",
+    "远山保险推出新能源车险产品",
+    "金桥信托增资至一百亿元",
+    "东浦证券获批基金投顾资格",
+    "南湾银行发行五十亿元绿色债券",
+    "北岭汽车召回部分纯电车型",
+    "天工机器人发布人形机械臂产品",
+    "灵犀软件推出工业操作系统",
+    "深蓝芯片启动先进封装产线",
+    "华岳能源建设海上风电项目",
+    "中河制造完成智能工厂改造",
+    "明州医药发布创新药临床进展",
+    "海晨物流开通东南亚货运航线",
+    "星州食品公布年度业绩预告",
+    "云鼎地产完成保障房项目交付",
+    "长江航运公司订造新型集装箱船",
+    "金穗农业发布种业研发成果",
+    "光谷通信中标运营商集采项目",
+    "远东材料建设碳纤维生产基地",
+    "山泉饮料启用华南智能仓",
+    "银河航空增开国际客运航线"
+  ];
+  const hits = titles.map((title, index) => ({
+    title: `中国${title}`,
+    url: `https://www.yicai.com/news/202610/${index + 1}.html`,
+    pubDate: now.toUTCString(),
+    sourceUrl: "https://www.yicai.com/"
+  }));
+
+  const digest = buildDigest(hits, now);
+  assert.equal(digest.count, 20);
+  assert.equal(digest.items.length, 20);
+});
+
+test("balances the digest across media sources before filling the remainder", () => {
+  const chinanews = Array.from({ length: 12 }, (_, index) => ({
+    id: `c${index}`,
+    sourceKey: "chinanews"
+  }));
+  const ithome = Array.from({ length: 8 }, (_, index) => ({
+    id: `i${index}`,
+    sourceKey: "ithome"
+  }));
+  const selected = selectDiverseItems([...chinanews, ...ithome], 20);
+
+  assert.equal(selected.length, 20);
+  assert.equal(selected[0].sourceKey, "chinanews");
+  assert.equal(selected[1].sourceKey, "ithome");
+  assert.equal(selected.filter((item) => item.sourceKey === "ithome").length, 8);
+});
+
+test("runs the scheduled update before 09:00 China time", async () => {
+  const workflow = await readFile(
+    new URL("../.github/workflows/deploy.yml", import.meta.url),
+    "utf8"
+  );
+  assert.match(workflow, /cron:\s*"45 0 \* \* \*"/);
 });
 
 test("rejects roundup articles as event sources", () => {
@@ -196,6 +308,72 @@ test("rejects roundup articles as event sources", () => {
       pubDate: new Date().toUTCString()
     }
   ]);
+  assert.equal(digest.count, 0);
+});
+
+test("ignores topic words that appear only in the article description", () => {
+  const digest = buildDigest([
+    {
+      title: "某地举办春季群众文化活动",
+      url: "https://www.chinanews.com.cn/cj/2026/10-19/123456.shtml",
+      description: "活动由某公司赞助，并讨论了经济政策和科技产业。",
+      pubDate: new Date().toUTCString(),
+      sourceUrl: "https://www.chinanews.com.cn/"
+    }
+  ]);
+  assert.equal(digest.count, 0);
+});
+
+test("rejects unconfirmed product rumors", () => {
+  const digest = buildDigest([
+    {
+      title: "消息称某厂明年推出新款AI芯片手机",
+      url: "https://www.ithome.com/0/123/456.htm",
+      description: "新品尚未发布。",
+      pubDate: new Date().toUTCString(),
+      sourceUrl: "https://www.ithome.com/"
+    }
+  ]);
+  assert.equal(digest.count, 0);
+});
+
+test("rejects international stories without a close China connection", () => {
+  const digest = buildDigest([
+    {
+      title: "前美联储副主席谈美国劳动力市场",
+      url: "https://www.yicai.com/news/103398907.html",
+      pubDate: new Date().toUTCString(),
+      sourceUrl: "https://www.yicai.com/"
+    }
+  ]);
+  assert.equal(digest.count, 0);
+});
+
+test("rejects low-signal competitions and product reservation notices", () => {
+  const now = new Date();
+  const digest = buildDigest(
+    [
+      {
+        title: "中国沿黄公路新能源汽车拉力赛闭幕",
+        url: "https://www.chinanews.com.cn/ty/2026/10-19/1.shtml",
+        pubDate: now.toUTCString(),
+        sourceUrl: "https://www.chinanews.com.cn/"
+      },
+      {
+        title: "中国华为新手机开启预约申购",
+        url: "https://www.ithome.com/0/123/457.htm",
+        pubDate: now.toUTCString(),
+        sourceUrl: "https://www.ithome.com/"
+      },
+      {
+        title: "中国网友让小米手机刷入模拟器系统",
+        url: "https://www.ithome.com/0/123/458.htm",
+        pubDate: now.toUTCString(),
+        sourceUrl: "https://www.ithome.com/"
+      }
+    ],
+    now
+  );
   assert.equal(digest.count, 0);
 });
 
@@ -215,12 +393,4 @@ test("uses the earliest publication time for an event", () => {
     now
   );
   assert.equal(digest.items[0].publishedAt, "2026-10-16T13:00:00.000Z");
-});
-
-test("keeps summaries to the last complete sentence", () => {
-  const summary =
-    "第一句话介绍新闻背景和主要事实，提供了足够的信息。第二句话继续说明政策影响和行业反应，也包含了很多重要细节。第三句话没有结束";
-  const cleaned = cleanSummary(summary, "另一条标题");
-  assert.ok(cleaned.endsWith("。"));
-  assert.ok(!cleaned.endsWith("结束"));
 });

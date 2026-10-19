@@ -1,6 +1,314 @@
 {
-  "updatedAt": "2026-10-17T00:00:00.000Z",
-  "count": 0,
-  "underfilled": true,
-  "items": []
+  "updatedAt": "2026-10-19T07:28:40.717Z",
+  "count": 20,
+  "underfilled": false,
+  "items": [
+    {
+      "id": "a股收评超3100只个股飘绿沪指深指收涨创业板指收跌",
+      "title": "A股收评：超3100只个股飘绿，沪指、深指收涨，创业板指收跌",
+      "tags": [
+        "finance"
+      ],
+      "publishedAt": "2026-10-19T03:44:42.000Z",
+      "sources": [
+        {
+          "name": "中国新闻网",
+          "url": "https://www.chinanews.com.cn/cj/2026/10-19/10717123.shtml",
+          "isVideo": false
+        }
+      ]
+    },
+    {
+      "id": "ai的尽头是电力海外算力中心扩容催热中国能源装备出海70载广交会",
+      "title": "AI的尽头是电力：海外算力中心扩容催热中国能源装备出海｜70载广交会",
+      "tags": [
+        "industries",
+        "tech"
+      ],
+      "publishedAt": "2026-10-19T07:24:08.000Z",
+      "sources": [
+        {
+          "name": "第一财经",
+          "url": "https://www.yicai.com/news/103398927.html",
+          "isVideo": false
+        }
+      ]
+    },
+    {
+      "id": "腾讯 ai 管家 marvis马维斯上架麒麟软件商店深度适配国产操作系统",
+      "title": "腾讯 AI 管家 Marvis（马维斯）上架麒麟软件商店，深度适配国产操作系统",
+      "tags": [
+        "tech"
+      ],
+      "publishedAt": "2026-10-19T06:59:17.000Z",
+      "sources": [
+        {
+          "name": "IT之家",
+          "url": "https://www.ithome.com/1/014/832.htm",
+          "isVideo": false
+        }
+      ]
+    },
+    {
+      "id": "国家统计局人工智能成为中国经济增长新引擎",
+      "title": "国家统计局：人工智能成为中国经济增长新引擎",
+      "tags": [
+        "economics",
+        "tech"
+      ],
+      "publishedAt": "2026-10-19T07:19:58.000Z",
+      "sources": [
+        {
+          "name": "中国新闻网",
+          "url": "https://www.chinanews.com.cn/cj/2026/10-19/10717183.shtml",
+          "isVideo": false
+        }
+      ]
+    },
+    {
+      "id": "收盘上证指数涨039 人形机器人板块涨幅居前",
+      "title": "收盘｜上证指数涨0.39% 人形机器人板块涨幅居前",
+      "tags": [
+        "finance",
+        "tech"
+      ],
+      "publishedAt": "2026-10-19T07:13:22.000Z",
+      "sources": [
+        {
+          "name": "第一财经",
+          "url": "https://www.yicai.com/news/103398908.html",
+          "isVideo": false
+        }
+      ]
+    },
+    {
+      "id": "理想汽车 ceo 李想谈自研和合作称是不同阶段的不同选择",
+      "title": "理想汽车 CEO 李想谈“自研和合作”，称是不同阶段的不同选择",
+      "tags": [
+        "industries"
+      ],
+      "publishedAt": "2026-10-19T06:39:19.000Z",
+      "sources": [
+        {
+          "name": "IT之家",
+          "url": "https://www.ithome.com/1/014/816.htm",
+          "isVideo": false
+        }
+      ]
+    },
+    {
+      "id": "国家统计局中国实现全年经济增长预期目标有坚实支撑",
+      "title": "国家统计局：中国实现全年经济增长预期目标有坚实支撑",
+      "tags": [
+        "economics"
+      ],
+      "publishedAt": "2026-10-19T07:06:53.000Z",
+      "sources": [
+        {
+          "name": "中国新闻网",
+          "url": "https://www.chinanews.com.cn/cj/2026/10-19/10717174.shtml",
+          "isVideo": false
+        }
+      ]
+    },
+    {
+      "id": "中国经济三季报发布统计局详解四大亮点",
+      "title": "中国经济三季报发布，统计局详解四大亮点",
+      "tags": [
+        "economics"
+      ],
+      "publishedAt": "2026-10-19T07:11:07.000Z",
+      "sources": [
+        {
+          "name": "第一财经",
+          "url": "https://www.yicai.com/news/103398866.html",
+          "isVideo": false
+        }
+      ]
+    },
+    {
+      "id": "字节火山引擎发起 seedance 精品 ai 剧激励计划单部作品最高可获 20 万元",
+      "title": "字节火山引擎发起 Seedance 精品 AI 剧激励计划，单部作品最高可获 20 万元",
+      "tags": [
+        "tech"
+      ],
+      "publishedAt": "2026-10-19T06:21:03.000Z",
+      "sources": [
+        {
+          "name": "IT之家",
+          "url": "https://www.ithome.com/1/014/794.htm",
+          "isVideo": false
+        }
+      ]
+    },
+    {
+      "id": "国家统计局规模以上制造业人工智能技术重点场景应用普及率超过13",
+      "title": "国家统计局：规模以上制造业人工智能技术重点场景应用普及率超过1/3",
+      "tags": [
+        "economics",
+        "industries",
+        "tech"
+      ],
+      "publishedAt": "2026-10-19T06:08:26.000Z",
+      "sources": [
+        {
+          "name": "中国新闻网",
+          "url": "https://www.chinanews.com.cn/cj/2026/10-19/10717119.shtml",
+          "isVideo": false
+        }
+      ]
+    },
+    {
+      "id": "宇树科技市值回升至1900亿元附近行业迎来政策与标准双重催化",
+      "title": "宇树科技市值回升至1900亿元附近，行业迎来政策与标准双重催化",
+      "tags": [
+        "tech",
+        "politics"
+      ],
+      "publishedAt": "2026-10-19T05:24:45.000Z",
+      "sources": [
+        {
+          "name": "第一财经",
+          "url": "https://www.yicai.com/news/103398683.html",
+          "isVideo": false
+        }
+      ]
+    },
+    {
+      "id": "阿里达摩院孟建熠玄铁芯片目前已经稳定出货超 60 亿颗",
+      "title": "阿里达摩院孟建熠：玄铁芯片目前已经稳定出货超 60 亿颗",
+      "tags": [
+        "tech"
+      ],
+      "publishedAt": "2026-10-19T05:21:57.000Z",
+      "sources": [
+        {
+          "name": "IT之家",
+          "url": "https://www.ithome.com/1/014/770.htm",
+          "isVideo": false
+        }
+      ]
+    },
+    {
+      "id": "国家统计局前三季度内需逐步改善",
+      "title": "国家统计局：前三季度内需逐步改善",
+      "tags": [
+        "economics"
+      ],
+      "publishedAt": "2026-10-19T05:55:57.000Z",
+      "sources": [
+        {
+          "name": "中国新闻网",
+          "url": "https://www.chinanews.com.cn/cj/2026/10-19/10717115.shtml",
+          "isVideo": false
+        }
+      ]
+    },
+    {
+      "id": "中国车企首次在欧洲落地独立电池工厂",
+      "title": "中国车企首次在欧洲落地独立电池工厂",
+      "tags": [
+        "industries"
+      ],
+      "publishedAt": "2026-10-19T04:41:15.000Z",
+      "sources": [
+        {
+          "name": "第一财经",
+          "url": "https://www.yicai.com/news/103398641.html",
+          "isVideo": false
+        }
+      ]
+    },
+    {
+      "id": "快狗打车拟 1 元出售中国内地业务并更名gogo 科技",
+      "title": "快狗打车拟 1 元出售中国内地业务，并更名“GOGO 科技”",
+      "tags": [
+        "tech"
+      ],
+      "publishedAt": "2026-10-19T03:39:45.000Z",
+      "sources": [
+        {
+          "name": "IT之家",
+          "url": "https://www.ithome.com/1/014/747.htm",
+          "isVideo": false
+        }
+      ]
+    },
+    {
+      "id": "国家统计局今年物价总水平呈现温和回升态势",
+      "title": "国家统计局：今年物价总水平呈现温和回升态势",
+      "tags": [
+        "economics"
+      ],
+      "publishedAt": "2026-10-19T05:48:59.000Z",
+      "sources": [
+        {
+          "name": "中国新闻网",
+          "url": "https://www.chinanews.com.cn/cj/2026/10-19/10717114.shtml",
+          "isVideo": false
+        }
+      ]
+    },
+    {
+      "id": "国产卫星互联网打通全球通信最后盲区 产业打开千亿级产业空间丨行业风口",
+      "title": "国产卫星互联网打通全球通信“最后盲区” 产业打开千亿级产业空间？丨行业风口",
+      "tags": [
+        "industries",
+        "tech"
+      ],
+      "publishedAt": "2026-10-19T07:13:35.000Z",
+      "sources": [
+        {
+          "name": "第一财经",
+          "url": "https://www.yicai.com/video/103398911.html",
+          "isVideo": true
+        }
+      ]
+    },
+    {
+      "id": "国家统计局谈前三季度gdp增速符合全年经济预期增长目标",
+      "title": "国家统计局谈前三季度GDP增速：符合全年经济预期增长目标",
+      "tags": [
+        "economics"
+      ],
+      "publishedAt": "2026-10-19T05:28:32.000Z",
+      "sources": [
+        {
+          "name": "中国新闻网",
+          "url": "https://www.chinanews.com.cn/cj/2026/10-19/10717105.shtml",
+          "isVideo": false
+        }
+      ]
+    },
+    {
+      "id": "2026中国企业全球化产业合作大会回顾",
+      "title": "2026中国企业全球化产业合作大会回顾",
+      "tags": [
+        "industries"
+      ],
+      "publishedAt": "2026-10-19T04:31:52.000Z",
+      "sources": [
+        {
+          "name": "第一财经",
+          "url": "https://www.yicai.com/video/103398633.html",
+          "isVideo": true
+        }
+      ]
+    },
+    {
+      "id": "一图读懂中国经济三季报",
+      "title": "一图读懂中国经济三季报",
+      "tags": [
+        "economics"
+      ],
+      "publishedAt": "2026-10-19T04:32:31.000Z",
+      "sources": [
+        {
+          "name": "中国新闻网",
+          "url": "https://www.chinanews.com.cn/cj/2026/10-19/10717088.shtml",
+          "isVideo": false
+        }
+      ]
+    }
+  ]
 }

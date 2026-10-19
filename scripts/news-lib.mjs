@@ -9,10 +9,13 @@ export const SEARCH_QUERIES = [
   "中国 政策 监管",
   "香港 澳门 台湾 中国",
   "(site:yicai.com OR site:cls.cn OR site:21jingji.com OR site:stcn.com OR site:cnstock.com) 中国",
+  "(site:cs.com.cn OR site:cnstock.com OR site:stcn.com) 中国 公司 公告",
   "(site:thepaper.cn OR site:jiemian.com OR site:caixin.com) 中国",
   "(国务院 OR 国家发展改革委 OR 商务部 OR 中国人民银行 OR 证监会 OR 统计局) 中国 政策 数据",
   "(site:csrc.gov.cn OR site:pbc.gov.cn OR site:stats.gov.cn) 公告 数据",
-  "(site:wallstreetcn.com OR site:36kr.com OR site:ithome.com OR site:cls.cn) 中国 公司"
+  "(site:wallstreetcn.com OR site:36kr.com OR site:ithome.com OR site:cls.cn) 中国 公司",
+  "(site:yicai.com OR site:cctv.com OR site:news.cn) 中国 视频 报道",
+  "(site:thepaper.cn OR site:jiemian.com OR site:cls.cn) 中国 视频"
 ];
 
 export const DIRECT_FEEDS = [
@@ -44,12 +47,14 @@ export const SOURCES = [
   { id: "21jingji", name: "21世纪经济报道", domain: "21jingji.com", sourceType: "trusted_media", trustLevel: 2 },
   { id: "stcn", name: "证券时报", domain: "stcn.com", sourceType: "trusted_media", trustLevel: 2 },
   { id: "cnstock", name: "上海证券报", domain: "cnstock.com", sourceType: "trusted_media", trustLevel: 2 },
+  { id: "cs", name: "中国证券报", domain: "cs.com.cn", sourceType: "trusted_media", trustLevel: 1 },
   { id: "cls", name: "财联社", domain: "cls.cn", sourceType: "trusted_media", trustLevel: 2 },
   { id: "wallstreetcn", name: "华尔街见闻", domain: "wallstreetcn.com", sourceType: "trusted_media", trustLevel: 2 },
   { id: "36kr", name: "36氪", domain: "36kr.com", sourceType: "trusted_media", trustLevel: 2 },
   { id: "ithome", name: "IT之家", domain: "ithome.com", sourceType: "trusted_media", trustLevel: 2 },
   { id: "scmp", name: "South China Morning Post", domain: "scmp.com", sourceType: "trusted_media", trustLevel: 1 },
   { id: "rthk", name: "香港电台", domain: "rthk.hk", sourceType: "trusted_media", trustLevel: 1 },
+  { id: "cctv", name: "央视网", domain: "cctv.com", sourceType: "trusted_media", trustLevel: 1 },
   { id: "cna-tw", name: "中央社", domain: "cna.com.tw", sourceType: "trusted_media", trustLevel: 1 },
   { id: "udn", name: "联合新闻网", domain: "udn.com", sourceType: "trusted_media", trustLevel: 2 },
   { id: "reuters", name: "Reuters", domain: "reuters.com", sourceType: "trusted_media", trustLevel: 1 },
@@ -258,6 +263,22 @@ function isDigestTitle(title) {
   );
 }
 
+function isUnconfirmedRumor(title) {
+  return /消息称|传闻|网传|爆料|疑似|曝光|渲染图|谍照|预热|开箱|上手|评测/.test(title);
+}
+
+function isLowSignalTitle(title) {
+  return /公开赛|拉力赛|马拉松|比赛|赛事|冠军|夺冠|预约申购|开抢|开售|优惠|促销|抽奖|明星代言|院士专家齐聚|共探.*新赛道|网友|刷入|模拟器|破解|教程/.test(
+    title
+  );
+}
+
+function isChinaRelated(title) {
+  return /中国|中方|国内|国产|全国|人民币|央行|A股|港股|沪深|上证|深证|创业板|科创板|北交所|国务院|国家|中央|商务部|财政部|工信部|统计局|证监会|北京|上海|天津|重庆|河北|山西|辽宁|吉林|黑龙江|江苏|浙江|安徽|福建|江西|山东|河南|湖北|湖南|广东|广西|海南|四川|贵州|云南|西藏|陕西|甘肃|青海|宁夏|新疆|内蒙古|香港|澳门|台湾|腾讯|阿里|字节|华为|小米|比亚迪|宁德时代|理想|蔚来|小鹏|宇树|京东|拼多多|百度|美团|滴滴|中国移动|中国电信|中国联通/.test(
+    title
+  );
+}
+
 export function groupCandidates(candidates) {
   const groups = [];
   for (const candidate of candidates) {
@@ -291,11 +312,12 @@ export function verifyGroups(groups) {
   for (const group of groups) {
     if (hasCoreConflict(group)) continue;
     const representativeSources = representativeSourcesForGroup(group);
+    if (representativeSources.length === 0) continue;
 
     const officials = representativeSources.filter((source) => source.sourceType === "official");
     const media = representativeSources.filter((source) => source.sourceType === "trusted_media");
 
-    if (officials.length === 0 && media.length < 2) continue;
+    if (officials.length === 0 && media.length === 0) continue;
     if (officials.length > 0 && media.length === 0 && !isHighImpactOfficial(group[0].title)) continue;
     verified.push({
       key: normalizeTitle(group[0].title),
@@ -335,6 +357,21 @@ function representativeSourcesForGroup(group) {
   ];
 }
 
+function sourceLinksForArticles(articles) {
+  const links = new Map();
+  for (const article of articles) {
+    const isVideo = article.isVideo || isVideoUrl(article.url, article.title);
+    const key = `${article.source.id}:${isVideo ? "video" : "article"}`;
+    if (links.has(key)) continue;
+    links.set(key, {
+      name: article.source.name,
+      url: article.url,
+      isVideo
+    });
+  }
+  return [...links.values()];
+}
+
 export function diagnoseGroups(groups) {
   let multiSource = 0;
   let official = 0;
@@ -346,7 +383,7 @@ export function diagnoseGroups(groups) {
     const hasOfficial = sources.some((source) => source.sourceType === "official");
     if (hasOfficial) official += 1;
     if (media.length >= 2) multiSource += 1;
-    if (hasOfficial || media.length >= 2) confirmed += 1;
+    if (hasOfficial || media.length >= 1) confirmed += 1;
   }
 
   return { multiSource, official, confirmed };
@@ -354,14 +391,14 @@ export function diagnoseGroups(groups) {
 
 export function classify(text) {
   const rules = [
-    ["finance", /银行|证券|股票|债券|基金|保险|利率|汇率|金融|券商|投资/],
+    ["finance", /银行|证券|股票|债券|基金|保险|利率|汇率|金融|券商|投资|A股|沪指|深指|创业板|港股|美股|个股|涨停|跌停|成交额|收评|收盘|开盘/],
     ["economics", /经济|GDP|消费|通胀|就业|出口|进口|财政|统计局|增长|收入/],
-    ["industries", /公司|企业|并购|财报|公告|汽车|能源|制造|房地产|产业|工厂/],
+    ["industries", /公司|企业|并购|财报|公告|重组|整合|上市|回购|分红|汽车|能源|制造|房地产|地产|产业|工厂|信托|医药|物流|食品|农业|通信|材料|饮料|航空|航运|港口|机场|零售|电商|家电|钢铁|煤炭|石油|化工|电力|机械/],
     ["tech", /科技|人工智能|AI|芯片|半导体|互联网|软件|机器人|手机|大数据|数据中心|数据要素|数据安全|数据库/],
     ["politics", /政策|政府|国务院|人大|政协|外交|法院|监管|党委|主席|部长/]
   ];
   const tags = rules.filter(([, pattern]) => pattern.test(text)).map(([tag]) => tag);
-  return tags.length > 0 ? tags : ["industries"];
+  return tags;
 }
 
 export function importance(group) {
@@ -373,6 +410,54 @@ export function importance(group) {
     1,
     Math.min(100, Math.round(80 + sourceCount * 8 - (bestTrust - 1) * 8 - Math.min(ageHours / 6, 12)))
   );
+}
+
+export function selectDiverseItems(items, maxItems = 20) {
+  const buckets = new Map();
+  for (const item of items) {
+    const bucket = buckets.get(item.sourceKey) ?? [];
+    bucket.push(item);
+    buckets.set(item.sourceKey, bucket);
+  }
+
+  const queues = [...buckets.values()];
+  const selected = [];
+  while (selected.length < maxItems) {
+    let progressed = false;
+    for (const queue of queues) {
+      if (queue.length === 0) continue;
+      selected.push(queue.shift());
+      progressed = true;
+      if (selected.length === maxItems) break;
+    }
+    if (!progressed) break;
+  }
+  return selected;
+}
+
+export function isVideoUrl(value, title = "") {
+  if (/视频|直播|实录|发布会回放|记者探访/.test(title)) return true;
+
+  try {
+    const url = new URL(value);
+    const host = url.hostname.toLowerCase();
+    const pathname = url.pathname;
+    if (
+      host === "youtube.com" ||
+      host.endsWith(".youtube.com") ||
+      host === "youtu.be" ||
+      host.endsWith(".bilibili.com") ||
+      host === "b23.tv" ||
+      host.endsWith(".v.qq.com") ||
+      host.startsWith("video.") ||
+      host.startsWith("tv.")
+    ) {
+      return true;
+    }
+    return /\/(?:video|videos|vod|watch|live)(?:\/|$)/i.test(pathname) || /\/VIDE[0-9A-Z]/i.test(pathname);
+  } catch {
+    return false;
+  }
 }
 
 function canonicalizeUrl(value) {
@@ -399,6 +484,9 @@ export function buildDigest(hits, now = new Date()) {
     const source = sourceForUrl(hit.sourceUrl || hit.url);
     if (!source) continue;
     if (isDigestTitle(hit.title)) continue;
+    if (isUnconfirmedRumor(hit.title)) continue;
+    if (isLowSignalTitle(hit.title)) continue;
+    if (!isChinaRelated(hit.title)) continue;
 
     const publishedAt = hit.pubDate ? new Date(hit.pubDate) : dateFromUrl(hit.url);
     if (!publishedAt) continue;
@@ -421,6 +509,7 @@ export function buildDigest(hits, now = new Date()) {
           ? hit.title.slice(0, -(` - ${hit.sourceName}`).length)
           : hit.title,
         excerpt: hit.description,
+        isVideo: Boolean(hit.isVideo),
         publishedAt
       });
     }
@@ -446,32 +535,27 @@ export function buildDigest(hits, now = new Date()) {
       source: article.source.id
     }))
   }));
-  const verified = verifiedGroups
+  const rankedVerifiedGroups = verifiedGroups
     .map((group) => {
-      const text = `${group.articles[0].title} ${group.articles[0].excerpt}`;
-      const summary =
-        group.articles
-          .map((article) => cleanSummary(article.excerpt, group.articles[0].title))
-          .find(Boolean) ?? "";
+      const tags = classify(group.articles[0].title);
+      if (tags.length === 0) return null;
       return {
         id: group.key,
+        sourceKey: group.sources[0].id,
         title: group.articles[0].title,
-        summary,
-        tags: classify(text),
+        tags,
         importance: importance(group),
         publishedAt: new Date(
           Math.min(...group.articles.map((article) => article.publishedAt.getTime()))
         ).toISOString(),
-        sources: [...new Map(group.articles.map((article) => [article.source.id, article])).values()].map(
-          (article) => ({
-            name: article.source.name,
-            url: article.url
-          })
-        )
+        sources: sourceLinksForArticles(group.articles)
       };
     })
-    .sort((left, right) => right.importance - left.importance)
-    .map(({ importance, ...item }) => item);
+    .filter(Boolean)
+    .sort((left, right) => right.importance - left.importance);
+  const verified = selectDiverseItems(rankedVerifiedGroups).map(
+    ({ importance, sourceKey, ...item }) => item
+  );
 
   return {
     updatedAt: now.toISOString(),
@@ -534,124 +618,51 @@ export async function fetchDirectFeed(url, fetchImpl = fetch) {
   return parseFeed(await response.text());
 }
 
+export function parseYicaiList(html) {
+  const match = html.match(/\bvar firstlist = (\[[\s\S]*?\]);\s*<\/script>/);
+  if (!match) return [];
+
+  try {
+    return JSON.parse(match[1])
+      .map((item) => {
+        const createDate = String(item.CreateDate ?? "");
+        const normalized = /(?:Z|[+-]\d{2}:\d{2})$/.test(createDate)
+          ? createDate
+          : `${createDate}+08:00`;
+        const publishedAt = new Date(normalized);
+        if (!item.NewsTitle || !item.url || Number.isNaN(publishedAt.getTime())) return null;
+        return {
+          title: item.NewsTitle,
+          url: new URL(item.url, "https://www.yicai.com").toString(),
+          description: item.NewsNotes ?? "",
+          pubDate: publishedAt.toISOString(),
+          sourceUrl: "https://www.yicai.com/",
+          isVideo: Boolean(item.VideoUrl)
+        };
+      })
+      .filter(Boolean);
+  } catch {
+    return [];
+  }
+}
+
+export async function fetchYicaiList(fetchImpl = fetch, pageUrl = "https://www.yicai.com/news/") {
+  const response = await fetchImpl(pageUrl, {
+    signal: AbortSignal.timeout(8_000),
+    headers: {
+      "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 Chrome/126 Safari/537.36",
+      "Accept-Language": "zh-CN,zh;q=0.9"
+    }
+  });
+  if (!response.ok) throw new Error(`Yicai list failed: ${response.status}`);
+  return parseYicaiList(await response.text());
+}
+
 function isGoogleNewsUrl(value) {
   return value.startsWith("https://news.google.com/rss/articles/");
 }
 
-function decodeMetaContent(html, name) {
-  const patterns = [
-    new RegExp(
-      `<meta[^>]+(?:name|property)=["']${name}["'][^>]+content=["']([^"']+)["']`,
-      "i"
-    ),
-    new RegExp(
-      `<meta[^>]+content=["']([^"']+)["'][^>]+(?:name|property)=["']${name}["']`,
-      "i"
-    )
-  ];
-  for (const pattern of patterns) {
-    const match = html.match(pattern);
-    if (match) return stripHtml(match[1]);
-  }
-  return "";
-}
-
-export async function fetchArticleSummary(url, fetchImpl = fetch) {
-  try {
-    const response = await fetchImpl(url, {
-      signal: AbortSignal.timeout(3_500),
-      headers: {
-        "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 Chrome/126 Safari/537.36",
-        "Accept-Language": "zh-CN,zh;q=0.9"
-      }
-    });
-    if (!response.ok) return "";
-    const buffer = await response.arrayBuffer();
-    let html = new TextDecoder("utf-8").decode(buffer);
-    const charset = html
-      .slice(0, 2_000)
-      .match(/charset\s*=\s*["']?([a-zA-Z0-9_-]+)/i)?.[1]
-      ?.toLowerCase();
-    if (charset === "gb2312" || charset === "gbk" || charset === "gb18030") {
-      html = new TextDecoder("gbk").decode(buffer);
-    }
-    const meta =
-      decodeMetaContent(html, "description") ||
-      decodeMetaContent(html, "og:description") ||
-      decodeMetaContent(html, "twitter:description");
-    if (
-      meta.length >= 30 &&
-      /[。！？.!?]$/.test(meta) &&
-      !isUnusableSummary(meta)
-    ) {
-      return meta.slice(0, 650);
-    }
-
-    const articleMatch =
-      html.match(/<article(?:\s[^>]*)?>([\s\S]*?)<\/article>/i) ??
-      html.match(/<main(?:\s[^>]*)?>([\s\S]*?)<\/main>/i);
-    const contentHtml = articleMatch?.[1] ?? html;
-    let paragraphs = [...contentHtml.matchAll(/<p(?:\s[^>]*)?>([\s\S]*?)<\/p>/gi)]
-      .map((match) => stripHtml(match[1]))
-      .filter((value) => value.length >= 30);
-    if (paragraphs.length === 0) {
-      paragraphs = contentHtml
-        .split(/<p(?:\s[^>]*)?>/i)
-        .slice(1)
-        .map((chunk) => stripHtml(chunk.split(/<p(?:\s[^>]*)?>|<\/article>|<\/main>/i)[0]))
-        .filter((value) => value.length >= 30);
-    }
-    return paragraphs[0]?.slice(0, 650) ?? "";
-  } catch {
-    return "";
-  }
-}
-
-export function cleanSummary(value, title) {
-  let summary = stripHtml(value);
-  if (isUnusableSummary(summary)) {
-    return "";
-  }
-  const normalizedTitle = normalizeTitle(title);
-  const normalizedSummary = normalizeTitle(summary);
-
-  if (normalizedSummary.startsWith(normalizedTitle)) {
-    summary = summary.slice(title.length).replace(/^[\s:：\-—|丨]+/, "");
-  }
-  if (summary.length < 25 || similarity(summary, title) >= 0.75) return "";
-  const completeSentenceEnd = Math.max(
-    summary.lastIndexOf("。"),
-    summary.lastIndexOf("！"),
-    summary.lastIndexOf("？")
-  );
-  const endsWithCompleteSentence = /[。！？]$/.test(summary);
-  if (!endsWithCompleteSentence && completeSentenceEnd >= 25) {
-    return summary.slice(0, completeSentenceEnd + 1);
-  }
-  if (summary.length <= 320) return endsWithCompleteSentence ? summary : "";
-
-  const window = summary.slice(0, 320);
-  const sentenceEnd = Math.max(
-    window.lastIndexOf("。"),
-    window.lastIndexOf("！"),
-    window.lastIndexOf("？")
-  );
-  if (sentenceEnd >= 80) return window.slice(0, sentenceEnd + 1);
-
-  const clauseEnd = Math.max(
-    window.lastIndexOf("，"),
-    window.lastIndexOf("；")
-  );
-  return clauseEnd >= 80 ? `${window.slice(0, clauseEnd)}。` : "";
-}
-
-function isUnusableSummary(summary) {
-  return /打开微信.*扫一扫|访问安全|检测当前网络环境|第一财经官方网站|7X24小时提供股市行情|点击.*分享到朋友圈|责任编辑[：:]|网站导航|ICP备|网站标识码/.test(
-    summary
-  );
-}
-
-async function enrichDigest(digest, fetchImpl = fetch) {
+async function enrichDigest(digest) {
   const decoder = new GoogleDecoder();
   const googleUrls = [
     ...new Set(
@@ -671,27 +682,28 @@ async function enrichDigest(digest, fetchImpl = fetch) {
 
   const enrichedItems = [];
   for (const item of digest.items) {
-    const sources = item.sources
-      .map((source) => ({
-        ...source,
-        url: isGoogleNewsUrl(source.url) ? decoded.get(source.url) : source.url
-      }))
-      .filter((source) => source.url);
+    const sources = [
+      ...new Map(
+        item.sources
+          .map((source) => {
+            const url = isGoogleNewsUrl(source.url) ? decoded.get(source.url) : source.url;
+            return url
+              ? {
+                  ...source,
+                  url,
+                  isVideo: source.isVideo || isVideoUrl(url, item.title)
+                }
+              : null;
+          })
+          .filter(Boolean)
+          .map((source) => [source.url, source])
+      ).values()
+    ].sort((left, right) => Number(right.isVideo) - Number(left.isVideo));
 
     if (sources.length === 0) continue;
 
-    let articleSummary = "";
-    for (const source of sources.slice(0, 4)) {
-      articleSummary = cleanSummary(
-        await fetchArticleSummary(source.url, fetchImpl),
-        item.title
-      );
-      if (articleSummary) break;
-    }
-    const fallbackSummary = cleanSummary(item.summary, item.title);
     enrichedItems.push({
       ...item,
-      summary: articleSummary || fallbackSummary,
       sources
     });
   }
@@ -712,10 +724,12 @@ async function enrichDigest(digest, fetchImpl = fetch) {
 export async function fetchLatestDigest(fetchImpl = fetch) {
   const results = await Promise.allSettled([
     ...SEARCH_QUERIES.map((query) => fetchGoogleNewsRss(query, fetchImpl)),
-    ...DIRECT_FEEDS.map((url) => fetchDirectFeed(url, fetchImpl))
+    ...DIRECT_FEEDS.map((url) => fetchDirectFeed(url, fetchImpl)),
+    fetchYicaiList(fetchImpl),
+    fetchYicaiList(fetchImpl, "https://www.yicai.com/video/")
   ]);
   const hits = results.flatMap((result) => (result.status === "fulfilled" ? result.value : []));
-  const digest = await enrichDigest(buildDigest(hits), fetchImpl);
+  const digest = await enrichDigest(buildDigest(hits));
   digest.diagnostics.sourcesSucceeded = results.filter((result) => result.status === "fulfilled").length;
   digest.diagnostics.sourcesFailed = results.filter((result) => result.status === "rejected").length;
   return digest;

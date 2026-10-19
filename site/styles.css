@@ -111,15 +111,8 @@ h1 {
   line-height: 1.45;
 }
 
-.summary {
-  margin: 9px 0 0;
-  color: #475268;
-  font-size: 14px;
-  line-height: 1.75;
-}
-
 .meta {
-  margin-top: 12px;
+  margin: 10px 0 0;
   color: var(--muted);
   font-size: 12px;
 }
@@ -138,6 +131,11 @@ h1 {
 }
 
 .links a:hover { text-decoration: underline; }
+
+.links .video-link {
+  color: #9a3412;
+  font-weight: 600;
+}
 
 .item-tags {
   display: flex;

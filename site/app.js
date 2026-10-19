@@ -32,13 +32,12 @@ function renderItems() {
         <article class="item">
           <div>
             <h2>${escapeHtml(item.title)}</h2>
-            <p class="summary">${escapeHtml(item.summary || "暂无摘要，请查看原文。")}</p>
             <p class="meta">${formatDate(item.publishedAt)}</p>
             <div class="links">
               ${item.sources
                 .map(
                   (source) =>
-                    `<a href="${escapeAttribute(source.url)}" target="_blank" rel="noreferrer">${escapeHtml(source.name)}原文</a>`
+                    `<a class="${source.isVideo ? "video-link" : ""}" href="${escapeAttribute(source.url)}" target="_blank" rel="noreferrer">${source.isVideo ? "视频" : "原文"} · ${escapeHtml(source.name)}</a>`
                 )
                 .join("")}
             </div>
@@ -99,7 +98,7 @@ async function loadNews() {
     renderItems();
   } catch (error) {
     metaElement.textContent = error instanceof Error ? error.message : "获取失败";
-    newsElement.innerHTML = '<div class="empty">新闻获取失败，请点击右上角刷新重试。</div>';
+    newsElement.innerHTML = '<div class="empty">新闻获取失败，请稍后重新打开页面。</div>';
   }
 }
 
