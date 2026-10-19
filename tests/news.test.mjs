@@ -305,6 +305,12 @@ test("renders source names with only a small video badge", async () => {
   assert.match(app, /class="video-badge">视频<\/span>/);
 });
 
+test("versions frontend assets so browsers skip stale scripts", async () => {
+  const html = await readFile(new URL("../site/index.html", import.meta.url), "utf8");
+  assert.match(html, /href="\.\/styles\.css\?v=[^"]+"/);
+  assert.match(html, /src="\.\/app\.js\?v=[^"]+"/);
+});
+
 test("rejects roundup articles as event sources", () => {
   const digest = buildDigest([
     {
