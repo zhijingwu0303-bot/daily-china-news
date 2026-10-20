@@ -4,19 +4,23 @@ import { GoogleDecoder } from "google-news-url-decoder";
 export const SEARCH_QUERIES = [
   "中国 金融 财经",
   "中国 经济 统计局",
-  "中国 企业 公告 并购",
+  "中国 重大并购 重组 破产 产能扩张",
   "中国 科技 芯片 人工智能",
-  "中国 政策 监管",
+  "中国 政策 改革 规划 十五五",
+  "中国 扩大内需 消费 就业 房地产 地方债",
+  "中国 制造业 出口 产业链 供应链",
+  "中国 人工智能 算力 机器人 低空经济",
+  "中国 能源 电力 储能 光伏 电池",
   "中国 医药 医疗 创新药 医保",
   "香港 澳门 台湾 中国",
   "(site:yicai.com OR site:cls.cn OR site:21jingji.com OR site:stcn.com OR site:cnstock.com) 中国",
-  "(site:cs.com.cn OR site:cnstock.com OR site:stcn.com) 中国 公司 公告",
+  "(site:cs.com.cn OR site:cnstock.com OR site:stcn.com) 中国 重大并购 重组 业绩",
   "(site:thepaper.cn OR site:jiemian.com OR site:caixin.com) 中国",
   "(site:yicai.com OR site:jiemian.com OR site:thepaper.cn OR site:caixin.com OR site:21jingji.com) 医药 医疗 药品",
   "(国务院 OR 国家发展改革委 OR 商务部 OR 中国人民银行 OR 证监会 OR 统计局) 中国 政策 数据",
   "(site:csrc.gov.cn OR site:pbc.gov.cn OR site:stats.gov.cn) 公告 数据",
   "(site:nmpa.gov.cn OR site:nhc.gov.cn) 医药 医疗 药品",
-  "(site:wallstreetcn.com OR site:36kr.com OR site:ithome.com OR site:cls.cn) 中国 公司",
+  "(site:wallstreetcn.com OR site:36kr.com OR site:ithome.com OR site:cls.cn) 中国 产业 战略 重组",
   "(site:yicai.com OR site:cctv.com OR site:news.cn) 中国 视频 报道",
   "(site:thepaper.cn OR site:jiemian.com OR site:cls.cn) 中国 视频"
 ];
@@ -239,6 +243,7 @@ function distinctiveToken(token) {
 
 function sameEvent(leftTitle, rightTitle) {
   if (similarity(leftTitle, rightTitle) >= 0.72) return true;
+  if (longestCommonPhrase(leftTitle, rightTitle) >= 10) return true;
 
   const left = titleTokens(leftTitle);
   const right = titleTokens(rightTitle);
@@ -249,6 +254,18 @@ function sameEvent(leftTitle, rightTitle) {
   if (overlap.length >= 3 && similarity(leftTitle, rightTitle) >= 0.45) return true;
   if (overlap.includes("数据") && similarity(leftTitle, rightTitle) >= 0.25) return true;
   return similarity(leftTitle, rightTitle) >= 0.6;
+}
+
+function longestCommonPhrase(leftTitle, rightTitle) {
+  const left = normalizeTitle(leftTitle).replace(/\s+/g, "");
+  const right = normalizeTitle(rightTitle).replace(/\s+/g, "");
+  const longest = Math.min(left.length, right.length);
+  for (let length = Math.min(longest, 40); length >= 10; length -= 1) {
+    for (let index = 0; index <= left.length - length; index += 1) {
+      if (right.includes(left.slice(index, index + length))) return length;
+    }
+  }
+  return 0;
 }
 
 function dateFromUrl(value) {
@@ -278,7 +295,50 @@ function isLowSignalTitle(title) {
   );
 }
 
+function isRoutineFilingOrMarketUpdate(title) {
+  return /经营情况简报|经营简报|日常经营|主要经营数据|月度经营数据|生产经营简报|投资者关系活动|董事会决议|股东大会决议|监事会决议|股份质押|减持计划|增持计划|逆回购操作|公开市场操作|MLF操作|SLF操作|A股收评|收盘｜|午评|早盘｜|三大指数|沪指.*[涨跌]|创业板指.*[涨跌]|个股.*涨停|涨停潮|历史大底|市值.*(?:蒸发|回升)/.test(
+    title
+  );
+}
+
+export function editorialSignalScore(title) {
+  const positiveRules = [
+    [/国务院|国家发展改革委|发改委|商务部|财政部|中国人民银行|央行|证监会|统计局|工业和信息化部|工信部|国家卫生健康委|国家药监局|政策|规划|条例|办法|规则|改革|试点|监管|部署|意见|通知/, 5],
+    [/GDP|CPI|PPI|PMI|经济|消费|投资|就业|收入|内需|出口|进口|贸易|关税|房地产|地方债|财政|货币|金融|制造业|产业链|供应链|外资|物价/, 3],
+    [/并购|重组|收购|破产|退出|停产|复产|扩产|投产|产能|重大投资|战略转型|出售.*业务|裁员|建设.*(?:工厂|基地)|工厂|研发中心/, 4],
+    [/人工智能|AI|芯片|半导体|算力|机器人|低空经济|卫星互联网|大模型|操作系统|量子|固态电池/, 3],
+    [/创新药|医疗器械|医保|药品|临床|疫苗|公共卫生|生物医药|获批上市/, 3],
+    [/出口管制|反制|制裁|反倾销|海外建厂|出海|全球市场/, 3],
+    [/十五五|新质生产力|扩大内需|统一大市场|设备更新|以旧换新/, 5],
+    [/[0-9０-９]+家.*(?:公司|企业).*(?:业绩|利润|出口|就业|投资)/, 3]
+  ];
+  const negativeRules = [
+    [/经营情况简报|经营简报|日常经营|主要经营数据|生产经营简报|投资者关系活动|董事会决议|股东大会决议|监事会决议/, -8],
+    [/A股收评|收盘｜|午评|早盘｜|三大指数|沪指.*[涨跌]|创业板指.*[涨跌]|个股.*涨停|涨停潮|历史大底|市值.*(?:蒸发|回升)/, -8],
+    [/CEO.*称|董事长.*表示|负责人.*表示|专家.*表示|业内人士.*认为/, -3],
+    [/发布会定档|上架|预售|预约申购|开抢|开售|会员|优惠|促销|开箱|评测|预热/, -4],
+    [/座谈会|论坛|峰会|大会回顾|签约仪式|启动仪式|颁奖|荣获|获奖|斩获|即将启幕|将启|举行.*活动|赴.*取经|架起.*桥梁/, -4],
+    [/大师赛|赛事|带热.*消费/, -6],
+    [/即将上线|第[一二三四五六七八九十0-9]+集|节目预告|专题片|纪录片/, -6],
+    [/提醒.*(?:安全|防范)/, -6]
+  ];
+  let score = 0;
+  for (const [pattern, weight] of positiveRules) {
+    if (pattern.test(title)) score += weight;
+  }
+  for (const [pattern, weight] of negativeRules) {
+    if (pattern.test(title)) score += weight;
+  }
+  return score;
+}
+
 function isChinaRelated(title) {
+  if (
+    /美联储|欧央行|欧洲央行|日本央行|英国央行/.test(title) &&
+    !/中国|中方|人民币|A股|港股|沪深|上证|深证|创业板|科创板|北交所/.test(title)
+  ) {
+    return false;
+  }
   return /中国|中方|国内|国产|全国|人民币|央行|A股|港股|沪深|上证|深证|创业板|科创板|北交所|国务院|国家|中央|商务部|财政部|工信部|统计局|证监会|北京|上海|天津|重庆|河北|山西|辽宁|吉林|黑龙江|江苏|浙江|安徽|福建|江西|山东|河南|湖北|湖南|广东|广西|海南|四川|贵州|云南|西藏|陕西|甘肃|青海|宁夏|新疆|内蒙古|香港|澳门|台湾|腾讯|阿里|字节|华为|小米|比亚迪|宁德时代|理想|蔚来|小鹏|宇树|京东|拼多多|百度|美团|滴滴|中国移动|中国电信|中国联通/.test(
     title
   );
@@ -492,6 +552,7 @@ export function buildDigest(hits, now = new Date()) {
     if (isDigestTitle(hit.title)) continue;
     if (isUnconfirmedRumor(hit.title)) continue;
     if (isLowSignalTitle(hit.title)) continue;
+    if (isRoutineFilingOrMarketUpdate(hit.title)) continue;
     if (!isChinaRelated(hit.title)) continue;
 
     const publishedAt = hit.pubDate ? new Date(hit.pubDate) : dateFromUrl(hit.url);
@@ -544,7 +605,7 @@ export function buildDigest(hits, now = new Date()) {
   const rankedVerifiedGroups = verifiedGroups
     .map((group) => {
       const tags = classify(group.articles[0].title);
-      if (tags.length === 0) return null;
+      if (tags.length === 0 || editorialSignalScore(group.articles[0].title) < 3) return null;
       return {
         id: group.key,
         sourceKey: group.sources[0].id,

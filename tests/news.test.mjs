@@ -140,6 +140,14 @@ test("groups differently worded reports about the same economic event", () => {
   assert.equal(groups.length, 1);
 });
 
+test("groups a policy release with its follow-up question-and-answer", () => {
+  const groups = groupCandidates([
+    { title: "中国证监会发布《违规转让证券案件行政处罚实施规则》" },
+    { title: "中国证监会有关部门负责人就《违规转让证券案件行政处罚实施规则》答记者问" }
+  ]);
+  assert.equal(groups.length, 1);
+});
+
 test("does not group unrelated stories merely because both mention AI", () => {
   const groups = groupCandidates([
     { title: "印度首次报告测试AI模型侵入企业系统", source: { id: "a" } },
@@ -221,14 +229,14 @@ test("shows one link per outlet and media type", () => {
   const digest = buildDigest(
     [
       {
-        title: "中国A股收盘涨跌互现",
+        title: "中国央行发布金融监管新规",
         url: "https://www.chinanews.com.cn/cj/2026/10-19/1.shtml",
         description: "",
         pubDate: now.toUTCString(),
         sourceUrl: "https://www.chinanews.com.cn/"
       },
       {
-        title: "中国A股收盘涨跌互现",
+        title: "中国央行发布金融监管新规",
         url: "https://www.chinanews.com.cn/cj/2026/10-19/2.shtml",
         description: "",
         pubDate: now.toUTCString(),
@@ -241,53 +249,12 @@ test("shows one link per outlet and media type", () => {
   assert.equal(digest.items[0].sources.length, 1);
 });
 
-test("limits the digest to 20 events", () => {
-  const now = new Date();
-  const titles = [
-    "星河银行获批筹建上海分行",
-    "海岳证券完成对岭南期货收购",
-    "北辰汽车发布三季度财报",
-    "云峰芯片扩大武汉工厂产能",
-    "青禾基金下调科技ETF管理费率",
-    "远山保险推出新能源车险产品",
-    "金桥信托增资至一百亿元",
-    "东浦证券获批基金投顾资格",
-    "南湾银行发行五十亿元绿色债券",
-    "北岭汽车召回部分纯电车型",
-    "天工机器人发布人形机械臂产品",
-    "灵犀软件推出工业操作系统",
-    "深蓝芯片启动先进封装产线",
-    "华岳能源建设海上风电项目",
-    "中河制造完成智能工厂改造",
-    "明州医药发布创新药临床进展",
-    "海晨物流开通东南亚货运航线",
-    "星州食品公布年度业绩预告",
-    "云鼎地产完成保障房项目交付",
-    "长江航运公司订造新型集装箱船",
-    "金穗农业发布种业研发成果",
-    "光谷通信中标运营商集采项目",
-    "远东材料建设碳纤维生产基地",
-    "山泉饮料启用华南智能仓",
-    "银河航空增开国际客运航线"
-  ];
-  const hits = titles.map((title, index) => ({
-    title: `中国${title}`,
-    url: `https://www.yicai.com/news/202610/${index + 1}.html`,
-    pubDate: now.toUTCString(),
-    sourceUrl: "https://www.yicai.com/"
-  }));
-
-  const digest = buildDigest(hits, now);
-  assert.equal(digest.count, 20);
-  assert.equal(digest.items.length, 20);
-});
-
 test("balances the digest across media sources before filling the remainder", () => {
-  const chinanews = Array.from({ length: 12 }, (_, index) => ({
+  const chinanews = Array.from({ length: 30 }, (_, index) => ({
     id: `c${index}`,
     sourceKey: "chinanews"
   }));
-  const ithome = Array.from({ length: 8 }, (_, index) => ({
+  const ithome = Array.from({ length: 20 }, (_, index) => ({
     id: `i${index}`,
     sourceKey: "ithome"
   }));
@@ -296,7 +263,8 @@ test("balances the digest across media sources before filling the remainder", ()
   assert.equal(selected.length, 20);
   assert.equal(selected[0].sourceKey, "chinanews");
   assert.equal(selected[1].sourceKey, "ithome");
-  assert.equal(selected.filter((item) => item.sourceKey === "ithome").length, 8);
+  assert.equal(selected.filter((item) => item.sourceKey === "chinanews").length, 10);
+  assert.equal(selected.filter((item) => item.sourceKey === "ithome").length, 10);
 });
 
 test("runs the scheduled update before 09:00 China time", async () => {
@@ -367,6 +335,97 @@ test("rejects international stories without a close China connection", () => {
     }
   ]);
   assert.equal(digest.count, 0);
+});
+
+test("rejects routine company filings and daily market recaps", () => {
+  const now = new Date();
+  const digest = buildDigest(
+    [
+      {
+        title: "中国核工业建设股份有限公司关于经营情况简报的公告",
+        url: "https://www.cnstock.com/2026/10/19/1",
+        pubDate: now.toUTCString(),
+        sourceUrl: "https://www.cnstock.com/"
+      },
+      {
+        title: "A股收评：超3100只个股飘绿，沪指收涨",
+        url: "https://www.chinanews.com.cn/cj/2026/10-19/2.shtml",
+        pubDate: now.toUTCString(),
+        sourceUrl: "https://www.chinanews.com.cn/"
+      }
+    ],
+    now
+  );
+  assert.equal(digest.count, 0);
+});
+
+test("rejects operational notices, minor products, and international market noise", () => {
+  const now = new Date();
+  const digest = buildDigest(
+    [
+      {
+        title: "央行10月20日7天期逆回购操作量为零",
+        url: "https://www.chinanews.com.cn/cj/2026/10-20/1.shtml",
+        pubDate: now.toUTCString(),
+        sourceUrl: "https://www.chinanews.com.cn/"
+      },
+      {
+        title: "华为路由 X2 系列预售：AI Mesh 组网，478 元起",
+        url: "https://www.ithome.com/0/123/459.htm",
+        pubDate: now.toUTCString(),
+        sourceUrl: "https://www.ithome.com/"
+      },
+      {
+        title: "上海大师赛带热周边消费",
+        url: "https://www.yicai.com/news/202610/3.html",
+        pubDate: now.toUTCString(),
+        sourceUrl: "https://www.yicai.com/"
+      },
+      {
+        title: "法国遭遇股债双杀，欧央行会出手么",
+        url: "https://www.yicai.com/news/202610/4.html",
+        pubDate: now.toUTCString(),
+        sourceUrl: "https://www.yicai.com/"
+      },
+      {
+        title: "智算重塑产业增长极丨【懂行•国产算力】第三集即将上线",
+        url: "https://www.yicai.com/news/202610/5.html",
+        pubDate: now.toUTCString(),
+        sourceUrl: "https://www.yicai.com/"
+      }
+    ],
+    now
+  );
+  assert.equal(digest.count, 0);
+});
+
+test("keeps policy direction and major structural changes", () => {
+  const now = new Date();
+  const digest = buildDigest(
+    [
+      {
+        title: "国务院部署扩大内需和产业升级重点工作",
+        url: "https://www.gov.cn/zhengce/202610/1.htm",
+        pubDate: now.toUTCString(),
+        sourceUrl: "https://www.gov.cn/"
+      },
+      {
+        title: "比亚迪宣布在欧洲建设第二座整车工厂",
+        url: "https://www.yicai.com/news/202610/2.html",
+        pubDate: now.toUTCString(),
+        sourceUrl: "https://www.yicai.com/"
+      },
+      {
+        title: "国家药监局批准一款创新药上市",
+        url: "https://www.nmpa.gov.cn/202610/3.html",
+        pubDate: now.toUTCString(),
+        sourceUrl: "https://www.nmpa.gov.cn/"
+      }
+    ],
+    now
+  );
+  assert.equal(digest.count, 3);
+  assert.ok(digest.items.some((item) => item.tags.includes("healthcare")));
 });
 
 test("rejects low-signal competitions and product reservation notices", () => {

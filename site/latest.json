@@ -1,19 +1,189 @@
 {
-  "updatedAt": "2026-10-19T07:28:40.717Z",
-  "count": 20,
+  "updatedAt": "2026-10-20T03:43:15.665Z",
+  "count": 19,
   "underfilled": false,
   "items": [
     {
-      "id": "a股收评超3100只个股飘绿沪指深指收涨创业板指收跌",
-      "title": "A股收评：超3100只个股飘绿，沪指、深指收涨，创业板指收跌",
+      "id": "国家发展改革委推动存量政策与增量政策协同发力",
+      "title": "国家发展改革委：推动存量政策与增量政策协同发力",
       "tags": [
-        "finance"
+        "politics"
       ],
-      "publishedAt": "2026-10-19T03:44:42.000Z",
+      "publishedAt": "2026-10-20T03:13:31.000Z",
       "sources": [
         {
           "name": "中国新闻网",
-          "url": "https://www.chinanews.com.cn/cj/2026/10-19/10717123.shtml",
+          "url": "https://www.chinanews.com.cn/sh/2026/10-20/10717678.shtml",
+          "isVideo": false
+        }
+      ]
+    },
+    {
+      "id": "不等同降息权威解读央行货币政策目标利率择机换锚",
+      "title": "不等同降息！权威解读央行货币政策目标利率择机“换锚”",
+      "tags": [
+        "finance",
+        "politics"
+      ],
+      "publishedAt": "2026-10-20T02:53:50.000Z",
+      "sources": [
+        {
+          "name": "第一财经",
+          "url": "https://www.yicai.com/news/103400247.html",
+          "isVideo": false
+        }
+      ]
+    },
+    {
+      "id": "何立峰会见金融监管总局国际咨询委员会委员时指出 中国将继续扩大金融高水平开放 加快建设金融强国",
+      "title": "何立峰会见金融监管总局国际咨询委员会委员时指出 中国将继续扩大金融高水平开放 加快建设金融强国",
+      "tags": [
+        "finance",
+        "politics"
+      ],
+      "publishedAt": "2026-10-20T03:08:23.000Z",
+      "sources": [
+        {
+          "name": "中国新闻网",
+          "url": "https://www.chinanews.com.cn/gn/2026/10-20/10717664.shtml",
+          "isVideo": false
+        }
+      ]
+    },
+    {
+      "id": "三季度中国经济增速回升服务业多领域就业总量增加",
+      "title": "三季度中国经济增速回升，服务业多领域就业总量增加",
+      "tags": [
+        "economics"
+      ],
+      "publishedAt": "2026-10-19T13:43:08.000Z",
+      "sources": [
+        {
+          "name": "第一财经",
+          "url": "https://www.yicai.com/news/103399624.html",
+          "isVideo": false
+        }
+      ]
+    },
+    {
+      "id": "活力中国调研行政策红利释放 海口综保区产业发展添活力",
+      "title": "（活力中国调研行）政策红利释放 海口综保区产业发展添活力",
+      "tags": [
+        "industries",
+        "politics"
+      ],
+      "publishedAt": "2026-10-20T03:05:51.000Z",
+      "sources": [
+        {
+          "name": "中国新闻网",
+          "url": "https://www.chinanews.com.cn/cj/2026/10-20/10717642.shtml",
+          "isVideo": false
+        }
+      ]
+    },
+    {
+      "id": "专访阿迪达斯全球ceo中国市场连续13个季度增长 将持续加大在华投资",
+      "title": "专访阿迪达斯全球CEO：中国市场连续13个季度增长 将持续加大在华投资",
+      "tags": [
+        "finance",
+        "economics"
+      ],
+      "publishedAt": "2026-10-19T14:18:58.000Z",
+      "sources": [
+        {
+          "name": "第一财经",
+          "url": "https://www.yicai.com/video/103399671.html",
+          "isVideo": true
+        }
+      ]
+    },
+    {
+      "id": "海南自贸港首票汽车变速箱保税再制造业务落地",
+      "title": "海南自贸港首票汽车变速箱保税再制造业务落地",
+      "tags": [
+        "industries"
+      ],
+      "publishedAt": "2026-10-19T14:43:20.000Z",
+      "sources": [
+        {
+          "name": "中国新闻网",
+          "url": "https://www.chinanews.com.cn/cj/2026/10-19/10717514.shtml",
+          "isVideo": false
+        }
+      ]
+    },
+    {
+      "id": "国家统计局前三季度新动能对经济增长贡献率保持在40以上",
+      "title": "国家统计局：前三季度新动能对经济增长贡献率保持在40%以上",
+      "tags": [
+        "economics"
+      ],
+      "publishedAt": "2026-10-19T14:15:36.000Z",
+      "sources": [
+        {
+          "name": "第一财经",
+          "url": "https://www.yicai.com/video/103399668.html",
+          "isVideo": true
+        }
+      ]
+    },
+    {
+      "id": "重庆武隆十五五制造业产值规上工业总产值锚定双翻番",
+      "title": "重庆武隆：“十五五”制造业产值、规上工业总产值锚定双翻番",
+      "tags": [
+        "industries"
+      ],
+      "publishedAt": "2026-10-19T14:32:45.000Z",
+      "sources": [
+        {
+          "name": "中国新闻网",
+          "url": "https://www.chinanews.com.cn/cj/2026/10-19/10717506.shtml",
+          "isVideo": false
+        }
+      ]
+    },
+    {
+      "id": "增量政策集中释放 如何利好中国经济发展",
+      "title": "增量政策集中释放 如何利好中国经济发展?",
+      "tags": [
+        "economics",
+        "politics"
+      ],
+      "publishedAt": "2026-10-19T13:58:58.000Z",
+      "sources": [
+        {
+          "name": "第一财经",
+          "url": "https://www.yicai.com/video/103399649.html",
+          "isVideo": true
+        }
+      ]
+    },
+    {
+      "id": "商务部就英方称将共同应对中国汽车产业占主导地位事答记者问",
+      "title": "商务部就英方称将共同应对中国汽车产业占主导地位事答记者问",
+      "tags": [
+        "industries"
+      ],
+      "publishedAt": "2026-10-19T14:03:36.000Z",
+      "sources": [
+        {
+          "name": "中国新闻网",
+          "url": "https://www.chinanews.com.cn/cj/2026/10-19/10717483.shtml",
+          "isVideo": false
+        }
+      ]
+    },
+    {
+      "id": "20分钟搞定一周工作量ai重构科技服务降本路径上海科技服务业调研",
+      "title": "20分钟搞定一周工作量，AI重构科技服务降本路径｜上海科技服务业调研",
+      "tags": [
+        "tech"
+      ],
+      "publishedAt": "2026-10-19T11:57:50.000Z",
+      "sources": [
+        {
+          "name": "第一财经",
+          "url": "https://www.yicai.com/news/103399431.html",
           "isVideo": false
         }
       ]
@@ -35,83 +205,6 @@
       ]
     },
     {
-      "id": "腾讯 ai 管家 marvis马维斯上架麒麟软件商店深度适配国产操作系统",
-      "title": "腾讯 AI 管家 Marvis（马维斯）上架麒麟软件商店，深度适配国产操作系统",
-      "tags": [
-        "tech"
-      ],
-      "publishedAt": "2026-10-19T06:59:17.000Z",
-      "sources": [
-        {
-          "name": "IT之家",
-          "url": "https://www.ithome.com/1/014/832.htm",
-          "isVideo": false
-        }
-      ]
-    },
-    {
-      "id": "国家统计局人工智能成为中国经济增长新引擎",
-      "title": "国家统计局：人工智能成为中国经济增长新引擎",
-      "tags": [
-        "economics",
-        "tech"
-      ],
-      "publishedAt": "2026-10-19T07:19:58.000Z",
-      "sources": [
-        {
-          "name": "中国新闻网",
-          "url": "https://www.chinanews.com.cn/cj/2026/10-19/10717183.shtml",
-          "isVideo": false
-        }
-      ]
-    },
-    {
-      "id": "收盘上证指数涨039 人形机器人板块涨幅居前",
-      "title": "收盘｜上证指数涨0.39% 人形机器人板块涨幅居前",
-      "tags": [
-        "finance",
-        "tech"
-      ],
-      "publishedAt": "2026-10-19T07:13:22.000Z",
-      "sources": [
-        {
-          "name": "第一财经",
-          "url": "https://www.yicai.com/news/103398908.html",
-          "isVideo": false
-        }
-      ]
-    },
-    {
-      "id": "理想汽车 ceo 李想谈自研和合作称是不同阶段的不同选择",
-      "title": "理想汽车 CEO 李想谈“自研和合作”，称是不同阶段的不同选择",
-      "tags": [
-        "industries"
-      ],
-      "publishedAt": "2026-10-19T06:39:19.000Z",
-      "sources": [
-        {
-          "name": "IT之家",
-          "url": "https://www.ithome.com/1/014/816.htm",
-          "isVideo": false
-        }
-      ]
-    },
-    {
-      "id": "国家统计局中国实现全年经济增长预期目标有坚实支撑",
-      "title": "国家统计局：中国实现全年经济增长预期目标有坚实支撑",
-      "tags": [
-        "economics"
-      ],
-      "publishedAt": "2026-10-19T07:06:53.000Z",
-      "sources": [
-        {
-          "name": "中国新闻网",
-          "url": "https://www.chinanews.com.cn/cj/2026/10-19/10717174.shtml",
-          "isVideo": false
-        }
-      ]
-    },
-    {
       "id": "中国经济三季报发布统计局详解四大亮点",
       "title": "中国经济三季报发布，统计局详解四大亮点",
       "tags": [
@@ -127,125 +220,48 @@
       ]
     },
     {
-      "id": "字节火山引擎发起 seedance 精品 ai 剧激励计划单部作品最高可获 20 万元",
-      "title": "字节火山引擎发起 Seedance 精品 AI 剧激励计划，单部作品最高可获 20 万元",
-      "tags": [
-        "tech"
-      ],
-      "publishedAt": "2026-10-19T06:21:03.000Z",
-      "sources": [
-        {
-          "name": "IT之家",
-          "url": "https://www.ithome.com/1/014/794.htm",
-          "isVideo": false
-        }
-      ]
-    },
-    {
-      "id": "国家统计局规模以上制造业人工智能技术重点场景应用普及率超过13",
-      "title": "国家统计局：规模以上制造业人工智能技术重点场景应用普及率超过1/3",
+      "id": "ai 时代中国有哪两大核心优势世行前首席经济学家看好中国新一轮增长",
+      "title": "AI 时代，中国有哪两大核心优势？世行前首席经济学家：看好中国新一轮增长",
       "tags": [
         "economics",
-        "industries",
         "tech"
       ],
-      "publishedAt": "2026-10-19T06:08:26.000Z",
-      "sources": [
-        {
-          "name": "中国新闻网",
-          "url": "https://www.chinanews.com.cn/cj/2026/10-19/10717119.shtml",
-          "isVideo": false
-        }
-      ]
-    },
-    {
-      "id": "宇树科技市值回升至1900亿元附近行业迎来政策与标准双重催化",
-      "title": "宇树科技市值回升至1900亿元附近，行业迎来政策与标准双重催化",
-      "tags": [
-        "tech",
-        "politics"
-      ],
-      "publishedAt": "2026-10-19T05:24:45.000Z",
+      "publishedAt": "2026-10-19T10:01:14.000Z",
       "sources": [
         {
           "name": "第一财经",
-          "url": "https://www.yicai.com/news/103398683.html",
-          "isVideo": false
+          "url": "https://www.yicai.com/video/103399213.html",
+          "isVideo": true
         }
       ]
     },
     {
-      "id": "阿里达摩院孟建熠玄铁芯片目前已经稳定出货超 60 亿颗",
-      "title": "阿里达摩院孟建熠：玄铁芯片目前已经稳定出货超 60 亿颗",
+      "id": "工信部人形机器人全年产量将突破10万台 推动在300多个场景中加快验证和部署 发布会",
+      "title": "工信部：人形机器人全年产量将突破10万台 推动在300多个场景中加快验证和部署 | @发布会",
       "tags": [
         "tech"
       ],
-      "publishedAt": "2026-10-19T05:21:57.000Z",
-      "sources": [
-        {
-          "name": "IT之家",
-          "url": "https://www.ithome.com/1/014/770.htm",
-          "isVideo": false
-        }
-      ]
-    },
-    {
-      "id": "国家统计局前三季度内需逐步改善",
-      "title": "国家统计局：前三季度内需逐步改善",
-      "tags": [
-        "economics"
-      ],
-      "publishedAt": "2026-10-19T05:55:57.000Z",
-      "sources": [
-        {
-          "name": "中国新闻网",
-          "url": "https://www.chinanews.com.cn/cj/2026/10-19/10717115.shtml",
-          "isVideo": false
-        }
-      ]
-    },
-    {
-      "id": "中国车企首次在欧洲落地独立电池工厂",
-      "title": "中国车企首次在欧洲落地独立电池工厂",
-      "tags": [
-        "industries"
-      ],
-      "publishedAt": "2026-10-19T04:41:15.000Z",
+      "publishedAt": "2026-10-19T09:28:43.000Z",
       "sources": [
         {
           "name": "第一财经",
-          "url": "https://www.yicai.com/news/103398641.html",
-          "isVideo": false
+          "url": "https://www.yicai.com/video/103399169.html",
+          "isVideo": true
         }
       ]
     },
     {
-      "id": "快狗打车拟 1 元出售中国内地业务并更名gogo 科技",
-      "title": "快狗打车拟 1 元出售中国内地业务，并更名“GOGO 科技”",
-      "tags": [
-        "tech"
-      ],
-      "publishedAt": "2026-10-19T03:39:45.000Z",
-      "sources": [
-        {
-          "name": "IT之家",
-          "url": "https://www.ithome.com/1/014/747.htm",
-          "isVideo": false
-        }
-      ]
-    },
-    {
-      "id": "国家统计局今年物价总水平呈现温和回升态势",
-      "title": "国家统计局：今年物价总水平呈现温和回升态势",
+      "id": "对经济增长贡献率达到663 国家统计局答一财服务业是拉动经济增长主引擎吸纳就业的主力军 发布会",
+      "title": "对经济增长贡献率达到66.3% 国家统计局答一财：服务业是拉动经济增长主引擎、吸纳就业的主力军 | @发布会",
       "tags": [
         "economics"
       ],
-      "publishedAt": "2026-10-19T05:48:59.000Z",
+      "publishedAt": "2026-10-19T08:42:48.000Z",
       "sources": [
         {
-          "name": "中国新闻网",
-          "url": "https://www.chinanews.com.cn/cj/2026/10-19/10717114.shtml",
-          "isVideo": false
+          "name": "第一财经",
+          "url": "https://www.yicai.com/video/103399069.html",
+          "isVideo": true
         }
       ]
     },
@@ -266,46 +282,16 @@
       ]
     },
     {
-      "id": "国家统计局谈前三季度gdp增速符合全年经济预期增长目标",
-      "title": "国家统计局谈前三季度GDP增速：符合全年经济预期增长目标",
-      "tags": [
-        "economics"
-      ],
-      "publishedAt": "2026-10-19T05:28:32.000Z",
-      "sources": [
-        {
-          "name": "中国新闻网",
-          "url": "https://www.chinanews.com.cn/cj/2026/10-19/10717105.shtml",
-          "isVideo": false
-        }
-      ]
-    },
-    {
-      "id": "2026中国企业全球化产业合作大会回顾",
-      "title": "2026中国企业全球化产业合作大会回顾",
+      "id": "中国车企首次在欧洲落地独立电池工厂",
+      "title": "中国车企首次在欧洲落地独立电池工厂",
       "tags": [
         "industries"
       ],
-      "publishedAt": "2026-10-19T04:31:52.000Z",
+      "publishedAt": "2026-10-19T04:41:15.000Z",
       "sources": [
         {
           "name": "第一财经",
-          "url": "https://www.yicai.com/video/103398633.html",
-          "isVideo": true
-        }
-      ]
-    },
-    {
-      "id": "一图读懂中国经济三季报",
-      "title": "一图读懂中国经济三季报",
-      "tags": [
-        "economics"
-      ],
-      "publishedAt": "2026-10-19T04:32:31.000Z",
-      "sources": [
-        {
-          "name": "中国新闻网",
-          "url": "https://www.chinanews.com.cn/cj/2026/10-19/10717088.shtml",
+          "url": "https://www.yicai.com/news/103398641.html",
           "isVideo": false
         }
       ]
