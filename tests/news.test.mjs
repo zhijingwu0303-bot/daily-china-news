@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import test from "node:test";
 import {
+  SEARCH_QUERIES,
   buildDigest,
   classify,
   fetchYicaiList,
@@ -116,6 +117,13 @@ test("classifies business and economic news", () => {
   assert.deepEqual(classify("国家统计局公布消费和GDP数据"), ["economics"]);
   assert.deepEqual(classify("某上市公司发布并购公告"), ["industries"]);
   assert.ok(classify("A股收评：沪指收涨，创业板指收跌").includes("finance"));
+});
+
+test("classifies healthcare news and adds it alongside related categories", () => {
+  assert.deepEqual(classify("国家药监局批准创新药上市"), ["healthcare"]);
+  assert.ok(classify("某医药公司发布创新药临床进展").includes("healthcare"));
+  assert.ok(classify("某医药公司发布创新药临床进展").includes("industries"));
+  assert.ok(SEARCH_QUERIES.some((query) => /医药|医疗/.test(query)));
 });
 
 test("does not classify sports, culture, or human-interest stories as industries", () => {

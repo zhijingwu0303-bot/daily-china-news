@@ -7,12 +7,15 @@ export const SEARCH_QUERIES = [
   "中国 企业 公告 并购",
   "中国 科技 芯片 人工智能",
   "中国 政策 监管",
+  "中国 医药 医疗 创新药 医保",
   "香港 澳门 台湾 中国",
   "(site:yicai.com OR site:cls.cn OR site:21jingji.com OR site:stcn.com OR site:cnstock.com) 中国",
   "(site:cs.com.cn OR site:cnstock.com OR site:stcn.com) 中国 公司 公告",
   "(site:thepaper.cn OR site:jiemian.com OR site:caixin.com) 中国",
+  "(site:yicai.com OR site:jiemian.com OR site:thepaper.cn OR site:caixin.com OR site:21jingji.com) 医药 医疗 药品",
   "(国务院 OR 国家发展改革委 OR 商务部 OR 中国人民银行 OR 证监会 OR 统计局) 中国 政策 数据",
   "(site:csrc.gov.cn OR site:pbc.gov.cn OR site:stats.gov.cn) 公告 数据",
+  "(site:nmpa.gov.cn OR site:nhc.gov.cn) 医药 医疗 药品",
   "(site:wallstreetcn.com OR site:36kr.com OR site:ithome.com OR site:cls.cn) 中国 公司",
   "(site:yicai.com OR site:cctv.com OR site:news.cn) 中国 视频 报道",
   "(site:thepaper.cn OR site:jiemian.com OR site:cls.cn) 中国 视频"
@@ -30,6 +33,8 @@ export const SOURCES = [
   { id: "gov-cn", name: "中国政府网", domain: "gov.cn", sourceType: "official", trustLevel: 1 },
   { id: "pbc", name: "中国人民银行", domain: "pbc.gov.cn", sourceType: "official", trustLevel: 1 },
   { id: "stats-cn", name: "国家统计局", domain: "stats.gov.cn", sourceType: "official", trustLevel: 1 },
+  { id: "nhc", name: "国家卫生健康委员会", domain: "nhc.gov.cn", sourceType: "official", trustLevel: 1 },
+  { id: "nmpa", name: "国家药品监督管理局", domain: "nmpa.gov.cn", sourceType: "official", trustLevel: 1 },
   { id: "court-cn", name: "中国法院网", domain: "chinacourt.org", sourceType: "official", trustLevel: 1 },
   { id: "macao-gov", name: "澳门特别行政区政府", domain: "gov.mo", sourceType: "official", trustLevel: 1 },
   { id: "csrc", name: "中国证监会", domain: "csrc.gov.cn", sourceType: "official", trustLevel: 1 },
@@ -332,7 +337,7 @@ export function verifyGroups(groups) {
 function isHighImpactOfficial(title) {
   const noise = /比选|采购|招标|中标|公示|申报|遴选|接访|拍卖|体检|租赁|自行采购|结果公告|开标公告/.test(title);
   if (noise) return false;
-  return /国务院|国家发展改革委|发改委|商务部|财政部|中国人民银行|央行|证监会|统计局|工业和信息化部|工信部|市场监管总局|习近平|李强|政策|意见|条例|数据|经济|金融|贸易|出口|进口|关税|人工智能|芯片|房地产|就业|消费|利率|人民币/.test(
+  return /国务院|国家发展改革委|发改委|商务部|财政部|中国人民银行|央行|证监会|统计局|工业和信息化部|工信部|市场监管总局|国家卫生健康委|国家药监局|习近平|李强|政策|意见|条例|数据|经济|金融|贸易|出口|进口|关税|人工智能|芯片|房地产|就业|消费|利率|人民币|医药|医疗|药品|医保|创新药|医疗器械|疫苗|公共卫生/.test(
     title
   );
 }
@@ -393,9 +398,10 @@ export function classify(text) {
   const rules = [
     ["finance", /银行|证券|股票|债券|基金|保险|利率|汇率|金融|券商|投资|A股|沪指|深指|创业板|港股|美股|个股|涨停|跌停|成交额|收评|收盘|开盘/],
     ["economics", /经济|GDP|消费|通胀|就业|出口|进口|财政|统计局|增长|收入/],
-    ["industries", /公司|企业|并购|财报|公告|重组|整合|上市|回购|分红|汽车|能源|制造|房地产|地产|产业|工厂|信托|医药|物流|食品|农业|通信|材料|饮料|航空|航运|港口|机场|零售|电商|家电|钢铁|煤炭|石油|化工|电力|机械/],
+    ["industries", /公司|企业|并购|财报|公告|重组|整合|IPO|首次公开发行|回购|分红|汽车|能源|制造|房地产|地产|产业|工厂|信托|医药|物流|食品|农业|通信|材料|饮料|航空|航运|港口|机场|零售|电商|家电|钢铁|煤炭|石油|化工|电力|机械/],
     ["tech", /科技|人工智能|AI|芯片|半导体|互联网|软件|机器人|手机|大数据|数据中心|数据要素|数据安全|数据库/],
-    ["politics", /政策|政府|国务院|人大|政协|外交|法院|监管|党委|主席|部长/]
+    ["politics", /政策|政府|国务院|人大|政协|外交|法院|监管|党委|主席|部长/],
+    ["healthcare", /医药|医疗|药品|药企|创新药|医疗器械|疫苗|医保|医院|临床|药监|疾控|公共卫生|生物医药/]
   ];
   const tags = rules.filter(([, pattern]) => pattern.test(text)).map(([tag]) => tag);
   return tags;
